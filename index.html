@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laura Vieira Arruda — Social Media</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Firebase Compat SDKs — funcionam em file://, http:// e https:// -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <script>
+        (function() {
+            const firebaseConfig = {
+                apiKey:            "AIzaSyAu3iSqBGQXHP3Z0oH-axlMf7G2PoWpKxE",
+                authDomain:        "laura-portfolio-cc181.firebaseapp.com",
+                projectId:         "laura-portfolio-cc181",
+                storageBucket:     "laura-portfolio-cc181.firebasestorage.app",
+                messagingSenderId: "839867448142",
+                appId:             "1:839867448142:web:3bd614672fe4bf53617c1f"
+            };
+
+            try {
+                const fbApp   = firebase.initializeApp(firebaseConfig);
+                const db      = firebase.firestore();
+                const storage = firebase.storage();
+                const DOC_ID  = 'main';
+
+                window._fb = {
+                    async saveData(D) {
+                        // _stripHeavyData é definida no escopo global — remove base64 antes de salvar
+                        const toSave = typeof _stripHeavyData === 'function'
+                            ? _stripHeavyData(D)
+                            : JSON.parse(JSON.stringify(D));
+                        await db.collection('portfolio').doc(DOC_ID).set(toSave);
+                    },
+
+                    async loadData() {
+                        const snap = await db.collection('portfolio').doc(DOC_ID).get();
+                        return snap.exists ? snap.data() : null;
+                    },
+
+                    async uploadVideo(file, index) {
+                        const path = 'reels/reel_' + index + '_' + Date.now() + '.mp4';
+                        const storageRef = storage.ref(path);
+                        await storageRef.put(file);
+                        const url = await storageRef.getDownloadURL();
+                        return { url: url, path: path };
+                    },
+
+                    async deleteVideo(path) {
+                        if (!path) return;
+                        try { await storage.ref(path).delete(); } catch(e) {}
+                    },
+
+                    // Upload de imagem para Storage — retorna URL permanente
+                    async uploadImage(blob, folder, name) {
+                        const path = folder + '/' + name + '_' + Date.now() + '.jpg';
+                        const storageRef = storage.ref(path);
+                        await storageRef.put(blob, { contentType: 'image/jpeg' });
+                        const url = await storageRef.getDownloadURL();
+                        return { url: url, path: path };
+                    },
+
+                    async deleteImage(path) {
+                        if (!path) return;
+                        try { await storage.ref(path).delete(); } catch(e) {}
+                    }
+                };
+
+                window._fbReady = true;
+                window.dispatchEvent(new Event('firebase-ready'));
+                console.log('Firebase inicializado com sucesso.');
+            } catch(err) {
+                console.error('Erro ao inicializar Firebase:', err);
+                window._fbReady = false;
+                window.dispatchEvent(new Event('firebase-ready'));
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --bg0: #070707;
+            --bg1: #101010;
+            --bgc: #161616;
+            --gold: #C9A84C;
+            --gold-l: #E2C97E;
+            --gold-d: #9A7A2A;
+            --rose: #B76E79;
+            --rose-l: #D49098;
+            --t1: #F0EAD6;
+            --t2: #95897a;
+            --border: rgba(201, 168, 76, 0.18);
+            --border-gold: rgba(201, 168, 76, 0.2);
+            --grad: linear-gradient(135deg, #C9A84C, #E2C97E, #9A7A2A);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg0);
+            color: var(--t1);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+        }
+
+        a {
+            color: var(--gold);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--gold-l);
+        }
+
+        button {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(7, 7, 7, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--t2);
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
+        }
+
+        .nav-cta {
+            padding: 0.6rem 1.3rem;
+            background: var(--gold);
+            color: var(--bg0);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            transition: background 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            background: var(--gold-l);
+            color: var(--bg0);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        section {
+            padding: 5rem 2rem;
+            position: relative;
+        }
+
+        .alt {
+            background-color: var(--bg1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-heading h2 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #F0EAD6 40%, #C9A84C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-heading p {
+            font-size: 0.95rem;
+            color: var(--t2);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        #hero {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .hero-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 150px 2rem 80px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content {
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .hero-pill {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(201, 168, 76, 0.1);
+            border: 1px solid var(--border-gold);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-name {
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            color: var(--t1);
+        }
+
+        .hero-name span {
+            color: var(--gold);
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--rose);
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+        }
+
+        .hero-bio {
+            font-size: 0.95rem;
+            color: var(--t2);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            max-width: 450px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            padding: 0.75rem 1.8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-primary {
+            background: var(--gold);
+            color: var(--bg0);
+        }
+
+        .cta-primary:hover {
+            background: var(--gold-l);
+            transform: translateY(-2px);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .cta-secondary:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: var(--gold-l);
+            color: var(--gold-l);
+        }
+
+        .hero-badges {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.6rem 1rem;
+            background: rgba(201, 168, 76, 0.08);
+            border: 1px solid var(--border-gold);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--t1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-icon {
+            font-size: 1rem;
+        }
+
+        .hero-image {
+            position: relative;
+            animation: fadeInRight 0.8s ease forwards;
+            opacity: 0;
+            animation-delay: 0.2s;
+        }
+
+        .image-frame {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.1), rgba(183, 110, 121, 0.1));
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            color: var(--t2);
+            cursor: default;
+            transition: border-color 0.3s ease;
+        }
+
+        .image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-placeholder {
+            text-align: center;
+        }
+
+        .image-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .image-placeholder p {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .about-text {
+            font-size: 0.95rem;
+            color: var(--t2);
+            line-height: 1.8;
+        }
+
+        .highlights {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .highlight-card {
+            background: rgba(201, 168, 76, 0.05);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .highlight-card:hover {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .highlight-icon {
+            font-size: 1.8rem;
+            color: var(--gold);
+            margin-bottom: 0.8rem;
+        }
+
+        .highlight-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--t1);
+        }
+
+        .highlight-text {
+            font-size: 0.85rem;
+            color: var(--t2);
+            line-height: 1.6;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: rgba(201, 168, 76, 0.03);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(201, 168, 76, 0.1), transparent);
+            transition: top 0.3s ease;
+        }
+
+        .service-card:hover {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.08);
+            transform: translateY(-6px);
+        }
+
+        .service-icon {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .service-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--t1);
+        }
+
+        .service-desc {
+            font-size: 0.85rem;
+            color: var(--t2);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .service-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            padding: 0.35rem 0.7rem;
+            background: rgba(201, 168, 76, 0.15);
+            border-radius: 50px;
+            font-size: 0.65rem;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .process-steps {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .process-steps::before {
+                content: '';
+                position: absolute;
+                top: 80px;
+                left: 5%;
+                right: 5%;
+                height: 2px;
+                background: linear-gradient(to right, transparent, var(--gold), transparent);
+                z-index: 0;
+            }
+        }
+
+        .step {
+            background: rgba(201, 168, 76, 0.03);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 1.8rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .step-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .step-icon {
+            font-size: 1.8rem;
+            color: var(--rose);
+            margin: 0.8rem 0;
+        }
+
+        .step-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.8rem 0;
+            color: var(--t1);
+        }
+
+        .step-desc {
+            font-size: 0.8rem;
+            color: var(--t2);
+            line-height: 1.6;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .tool-category {
+            background: rgba(201, 168, 76, 0.03);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .tool-category:hover {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-icon {
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+
+        .tool-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--t1);
+        }
+
+        .tool-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .tool-pill {
+            padding: 0.4rem 0.8rem;
+            background: rgba(201, 168, 76, 0.15);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: var(--gold);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tool-pill:hover {
+            background: rgba(201, 168, 76, 0.25);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .portfolio-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+
+        .portfolio-bg {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--border-gold);
+            transition: all 0.4s ease;
+        }
+
+        .portfolio-item:hover .portfolio-bg {
+            border-color: var(--gold);
+        }
+
+        .portfolio-icon {
+            font-size: 3rem;
+            opacity: 0.7;
+            transition: all 0.4s ease;
+        }
+
+        .portfolio-item:hover .portfolio-icon {
+            opacity: 0.9;
+            transform: scale(1.1);
+        }
+
+        .portfolio-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+
+        .portfolio-info {
+            width: 100%;
+        }
+
+        .portfolio-category {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.3rem;
+        }
+
+        .portfolio-caption {
+            font-size: 0.9rem;
+            color: var(--t1);
+            font-weight: 500;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--gold), transparent);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-gold);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -9px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            background: var(--bg0);
+            border: 3px solid var(--gold);
+            border-radius: 50%;
+        }
+
+        .timeline-icon {
+            display: inline-block;
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-right: 0.8rem;
+        }
+
+        .timeline-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--t1);
+            margin-bottom: 0.2rem;
+        }
+
+        .timeline-institution {
+            font-size: 0.85rem;
+            color: var(--rose);
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-year {
+            font-size: 0.75rem;
+            color: var(--t2);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-desc {
+            font-size: 0.8rem;
+            color: var(--t2);
+            line-height: 1.6;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(201, 168, 76, 0.05);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--t2);
+            font-weight: 500;
+        }
+
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .partner-card {
+            background: rgba(201, 168, 76, 0.03);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .partner-card:hover {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .partner-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .partner-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--t1);
+        }
+
+        .partner-category {
+            font-size: 0.8rem;
+            color: var(--t2);
+            font-weight: 500;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            border-radius: 10px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-gradient {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .testimonial-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-stars {
+            display: flex;
+            gap: 0.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .star {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .testimonial-text {
+            font-size: 0.95rem;
+            color: var(--t1);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .author-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+            color: var(--t1);
+        }
+
+        .author-role {
+            font-size: 0.75rem;
+            color: var(--t2);
+        }
+
+        #contato {
+            text-align: center;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .contact-btn {
+            padding: 1rem 1.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .contact-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .contact-whatsapp:hover {
+            background: #20BA5A;
+            transform: translateY(-2px);
+        }
+
+        .contact-email {
+            background: var(--gold);
+            color: var(--bg0);
+        }
+
+        .contact-email:hover {
+            background: var(--gold-l);
+            transform: translateY(-2px);
+        }
+
+        .contact-divider {
+            max-width: 300px;
+            height: 1px;
+            background: var(--border);
+            margin: 2rem auto;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border: 1px solid var(--border-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        footer {
+            background: var(--bg1);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--t2);
+            font-size: 0.85rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+
+        .footer-niches {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .niche-tag {
+            padding: 0.3rem 0.6rem;
+            background: rgba(201, 168, 76, 0.1);
+            border-radius: 50px;
+            color: var(--gold);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        #adm-fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 8888;
+            background: rgba(7, 7, 7, 0.9);
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            color: var(--gold);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        #adm-fab:hover {
+            border-color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        #adm-login {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        #adm-login.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--bgc);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--gold);
+            text-align: center;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            background: var(--bg0);
+            border: 1px solid var(--border-gold);
+            border-radius: 6px;
+            color: var(--t1);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--gold);
+            color: var(--bg0);
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--gold-l);
+        }
+
+        #adm-panel {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg0);
+        }
+
+        #adm-panel.show {
+            display: flex;
+        }
+
+        #adm-panel:not(.show) {
+            display: none;
+        }
+
+        #adm-topbar {
+            height: 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+            background: var(--bgc);
+        }
+
+        .adm-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .adm-topbar-btns {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .adm-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .adm-btn-save {
+            background: var(--gold);
+            color: var(--bg0);
+        }
+
+        .adm-btn-save:hover {
+            background: var(--gold-l);
+        }
+
+        .adm-btn-secondary {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .adm-btn-secondary:hover {
+            background: rgba(201, 168, 76, 0.1);
+        }
+
+        .adm-btn-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--t2);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .adm-btn-close:hover {
+            color: var(--gold);
+        }
+
+        #adm-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #adm-sidebar {
+            width: 220px;
+            border-right: 1px solid rgba(201, 168, 76, 0.15);
+            overflow-y: auto;
+            background: var(--bg0);
+        }
+
+        .adm-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.75rem 1.2rem;
+            cursor: pointer;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            color: var(--t2);
+            border-left: 3px solid transparent;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .adm-tab:hover {
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .adm-tab.active {
+            border-left-color: var(--gold);
+            color: var(--gold);
+            background: rgba(201, 168, 76, 0.06);
+        }
+
+        .adm-tab i {
+            width: 16px;
+        }
+
+        #adm-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 2rem;
+        }
+
+        .adm-field {
+            margin-bottom: 1.2rem;
+        }
+
+        .adm-field label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.4rem;
+        }
+
+        .adm-field input,
+        .adm-field textarea,
+        .adm-field select {
+            width: 100%;
+            background: var(--bgc);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+            color: var(--t1);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border 0.25s ease;
+        }
+
+        .adm-field input:focus,
+        .adm-field textarea:focus,
+        .adm-field select:focus {
+            border-color: rgba(201, 168, 76, 0.6);
+        }
+
+        .adm-field textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .adm-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--gold);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-knob {
+            left: 23px;
+        }
+
+        .adm-item {
+            background: var(--bgc);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .adm-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .adm-item-remove {
+            padding: 0.3rem 0.7rem;
+            background: rgba(183, 110, 121, 0.2);
+            color: var(--rose);
+            border: none;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .adm-item-remove:hover {
+            background: rgba(183, 110, 121, 0.4);
+        }
+
+        .adm-add-btn {
+            padding: 0.6rem 1.2rem;
+            background: transparent;
+            color: var(--gold);
+            border: 1px dashed var(--gold);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .adm-add-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+        }
+
+        .adm-file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem;
+            background: var(--bgc);
+            border: 2px dashed var(--border-gold);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: var(--t2);
+        }
+
+        .adm-file-label:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .adm-file-label input {
+            display: none;
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-width: 200px;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            border: 1px solid var(--border-gold);
+            object-fit: cover;
+            margin-top: 1rem;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--gold);
+            color: var(--bg0);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            z-index: 99999;
+            animation: slideUp 0.3s ease;
+        }
+
+        .notification.error {
+            background: var(--rose);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .reel-item .portfolio-bg {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reel-item video {
+            transition: transform 0.4s ease;
+        }
+
+        .reel-item:hover video {
+            transform: scale(1.04);
+        }
+
+        .reel-play-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .reel-item:hover .reel-play-hint {
+            opacity: 1;
+        }
+
+        .reel-play-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(0,0,0,0.55);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .reel-badge {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: rgba(131, 58, 180, 0.85);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            z-index: 10;
+            letter-spacing: 0.05em;
+        }
+
+        .adm-color-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            .nav-toggle.open ~ .nav-links {
+                display: flex;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: rgba(7, 7, 7, 0.98);
+                border-bottom: 1px solid var(--border);
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .hero-inner {
+                grid-template-columns: 1fr;
+                padding-top: 100px;
+                padding-bottom: 60px;
+                gap: 2.5rem;
+                text-align: center;
+            }
+
+            .hero-ctas { justify-content: center; }
+            .hero-badges { justify-content: center; }
+            .hero-bio { margin: 0 auto 2rem; }
+            .hero-image { max-width: 320px; margin: 0 auto; }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .highlights {
+                grid-template-columns: 1fr;
+            }
+
+            #adm-sidebar {
+                width: 180px;
+                font-size: 0.7rem;
+            }
+
+            .adm-tab {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.7rem;
+            }
+
+            #adm-content {
+                padding: 1rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <button id="adm-fab" title="Painel Admin"><i class="fas fa-shield"></i></button>
+    <div id="adm-login" class="hidden">
+        <div class="login-box">
+            <div class="login-title">Painel de Controle</div>
+            <input type="password" id="adm-pwd" class="login-input" placeholder="Senha" />
+            <button class="login-btn" onclick="checkPwd()">Entrar</button>
+        </div>
+    </div>
+    <div id="adm-panel">
+        <div id="adm-topbar">
+            <div class="adm-title">Administrador</div>
+            <div class="adm-topbar-btns">
+                <button class="adm-btn adm-btn-save" onclick="saveAndApply()">Salvar Alterações</button>
+                <button class="adm-btn adm-btn-secondary" onclick="exportJSON()">Exportar JSON</button>
+                <button class="adm-btn adm-btn-secondary" onclick="importJSON()">Importar JSON</button>
+                <button class="adm-btn-close" onclick="closeAdmin()"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div id="adm-body">
+            <div id="adm-sidebar"></div>
+            <div id="adm-content"></div>
+        </div>
+    </div>
+    <input type="file" id="adm-import-file" accept=".json" style="display:none;" onchange="handleImportFile(event)" />
+
+    <script>
+        const SK = 'lva_pf_v3';
+        let D = {};
+
+        const DEFAULTS = {
+            meta: {
+                title: 'Laura Vieira Arruda — Social Media',
+                password: '48d0a846a946bfc7be0cb7729f23fbf983d62e55c5419eafe51b87bca163f25c'
+            },
+            colors: {
+                bg0: '#070707', bg1: '#101010', bgc: '#161616',
+                gold: '#C9A84C', gold_l: '#E2C97E', gold_d: '#9A7A2A',
+                rose: '#B76E79', rose_l: '#D49098',
+                t1: '#F0EAD6', t2: '#95897a'
+            },
+            identity: {
+                name1: 'Laura Vieira', name2: 'Arruda', title: 'Social Media',
+                subtitle: 'Especialista em Gestão de Redes Sociais',
+                bio: 'Apaixonada por comunicação digital, estratégia de marcas e resultados mensuráveis. Combino criatividade com visão analítica e intenção estratégica — porque crescer nas redes é uma equação que eu sei resolver.',
+                photo: null, location: 'São Paulo, Brasil', availability: 'Disponível para novos projetos'
+            },
+            hero: {
+                pill: 'Social Media & SEO Estratégico', show_badges: true,
+                b1_icon: '✨', b1_label: 'Status', b1_value: 'Disponível',
+                b2_icon: '📊', b2_label: 'Foco', b2_value: 'Resultados',
+                cta1_text: 'Ver Serviços', cta1_link: '#servicos',
+                cta2_text: 'Falar Comigo', cta2_link: '#contato'
+            },
+            metricas: {
+                visible: false,
+                items: [
+                    { value: '—', label: 'Contas Gerenciadas', icon: 'fa-users' },
+                    { value: '—', label: 'Engajamento Médio', icon: 'fa-fire' },
+                    { value: '—', label: 'Alcance Mensal', icon: 'fa-eye' },
+                    { value: '—', label: 'Projetos Entregues', icon: 'fa-briefcase' }
+                ]
+            },
+            sobre: {
+                visible: true,
+                text1: 'Moda, beleza e lifestyle definem minha linguagem visual. Mas é a visão estratégica e analítica que me diferencia: entendo métricas, ROI e o impacto real que cada publicação gera no crescimento da sua marca.',
+                text2: 'Sou a profissional que entrega conteúdo esteticamente impecável, estratégia com intenção e relatórios de desempenho ao final de cada parceria. Criatividade, SEO e análise caminham juntos.',
+                highlights: [
+                    { icon: 'fa-chart-line', title: 'Visão Analítica', text: 'Métricas e ROI acompanhados em cada campanha' },
+                    { icon: 'fa-palette', title: 'Estética Curada', text: 'Identidade visual consistente em cada entrega' },
+                    { icon: 'fa-bullseye', title: 'Foco em Resultado', text: 'Estratégias orientadas por dados e metas reais' },
+                    { icon: 'fa-handshake', title: 'Profissionalismo', text: 'Briefings e entregas sempre no prazo combinado' }
+                ]
+            },
+            servicos: {
+                visible: true,
+                title: 'O Que Posso Fazer Por Você',
+                subtitle: 'Soluções completas de social media para fazer sua marca crescer no digital',
+                items: [
+                    { icon: 'fa-calendar-days', title: 'Gestão de Redes Sociais', desc: 'Planejamento, criação e publicação de conteúdo consistente para Instagram, TikTok, LinkedIn e outras plataformas.', tags: 'Instagram,TikTok,LinkedIn' },
+                    { icon: 'fa-pen-nib', title: 'Copywriting & Legendas', desc: 'Textos persuasivos, legendas que engajam e CTAs que convertem. Comunicação alinhada com a voz da sua marca.', tags: 'Posts,Stories,Bio' },
+                    { icon: 'fa-wand-sparkles', title: 'Criação de Conteúdo Visual', desc: 'Artes, carrosséis, Reels e Stories com identidade visual coesa que traduz a essência da sua marca.', tags: 'Design,Reels,Carrossel' },
+                    { icon: 'fa-magnifying-glass', title: 'SEO + Intenção Estratégica', desc: 'Otimização de perfil, bio estratégica, uso de palavras-chave e intenção de busca para aumentar o alcance orgânico.', tags: 'SEO,Bio,Palavras-chave' },
+                    { icon: 'fa-chart-line', title: 'Estratégia & Posicionamento', desc: 'Diagnóstico completo, definição de persona, calendário editorial e estratégia de posicionamento digital.', tags: 'Diagnóstico,Calendário,Posicionamento' },
+                    { icon: 'fa-magnifying-glass-chart', title: 'Análise e Otimização', desc: 'Relatórios mensais detalhados com insights sobre alcance, engajamento, crescimento e oportunidades de melhoria contínua.', tags: 'Relatórios,Analytics,Otimização' }
+                ]
+            },
+            processo: {
+                visible: true,
+                title: 'Como Trabalho',
+                subtitle: 'Um processo claro e estruturado para entregar resultados reais',
+                items: [
+                    { num: '01', icon: 'fa-magnifying-glass', title: 'Diagnóstico', desc: 'Analiso o perfil atual, concorrentes, persona e objetivos de negócio antes de qualquer ação.' },
+                    { num: '02', icon: 'fa-map', title: 'Estratégia', desc: 'Defino posicionamento, pilares de conteúdo, tom de voz e calendário editorial personalizado.' },
+                    { num: '03', icon: 'fa-rocket', title: 'Execução', desc: 'Crio, publico e monitoro o conteúdo com atenção à identidade visual e consistência editorial.' },
+                    { num: '04', icon: 'fa-chart-bar', title: 'Análise', desc: 'Relatório mensal com métricas, aprendizados e ajustes estratégicos para evolução contínua.' }
+                ]
+            },
+            ferramentas: {
+                visible: true,
+                title: 'Ferramentas & Habilidades',
+                subtitle: 'Tecnologia a serviço de resultados reais',
+                categories: [
+                    { name: 'Design & Criação', icon: 'fa-palette', items: 'Canva Pro,Adobe Express,CapCut,Lightroom Mobile' },
+                    { name: 'Gestão & Agendamento', icon: 'fa-calendar-check', items: 'Meta Business Suite,Later,Buffer,Notion' },
+                    { name: 'Análise & Dados', icon: 'fa-chart-bar', items: 'Meta Insights,Google Analytics,TikTok Analytics,Planilhas Google' },
+                    { name: 'SEO & Posicionamento', icon: 'fa-magnifying-glass', items: 'SEMrush,Ubersuggest,Google Trends,Keyword Planner' }
+                ]
+            },
+            portfolio: {
+                visible: true,
+                title: 'Portfólio',
+                subtitle: 'Exemplos de projetos e trabalhos desenvolvidos',
+                username: '@lauravieiraarruda',
+                posts: [
+                    { gradient: 'linear-gradient(155deg,#3d1a20,#1a0d12)', icon: 'fa-wand-sparkles', icon_color: 'rgba(201,168,76,.38)', category: 'Social Media', caption: 'Gestão de perfil corporativo' },
+                    { gradient: 'linear-gradient(135deg,#2c2010,#1a1508)', icon: 'fa-pen-nib', icon_color: 'rgba(201,168,76,.38)', category: 'Copywriting', caption: 'Campanha de lançamento' },
+                    { gradient: 'linear-gradient(160deg,#0f1824,#0a1018)', icon: 'fa-chart-line', icon_color: 'rgba(183,110,121,.45)', category: 'Analytics', caption: 'Relatório de resultados' },
+                    { gradient: 'linear-gradient(135deg,#22160e,#1a1008)', icon: 'fa-palette', icon_color: 'rgba(201,168,76,.38)', category: 'Design', caption: 'Identidade visual de marca' },
+                    { gradient: 'linear-gradient(160deg,#20101c,#16080e)', icon: 'fa-magnifying-glass', icon_color: 'rgba(183,110,121,.45)', category: 'SEO', caption: 'Otimização de perfil e bio estratégica', image: null },
+                    { gradient: 'linear-gradient(135deg,#101820,#0c1520)', icon: 'fa-calendar-days', icon_color: 'rgba(201,168,76,.38)', category: 'Planejamento', caption: 'Calendário editorial mensal' },
+                    { gradient: 'linear-gradient(160deg,#201c0e,#15140c)', icon: 'fa-video', icon_color: 'rgba(201,168,76,.38)', category: 'Reels', caption: 'Produção de conteúdo em vídeo' },
+                    { gradient: 'linear-gradient(135deg,#1e1014,#140c10)', icon: 'fa-users', icon_color: 'rgba(183,110,121,.45)', category: 'Comunidade', caption: 'Gestão de comunidade digital' },
+                    { gradient: 'linear-gradient(160deg,#12181e,#0c1218)', icon: 'fa-magnifying-glass', icon_color: 'rgba(201,168,76,.38)', category: 'Estratégia', caption: 'Diagnóstico de marca' }
+                ]
+            },
+            formacao: {
+                visible: true,
+                title: 'Formação & Certificações',
+                subtitle: 'Base sólida para resultados consistentes',
+                items: [
+                    { type: 'graduation', icon: 'fa-graduation-cap', title: 'Marketing & Comunicação Digital', institution: 'Formação em andamento', year: '2022 – Presente', desc: 'Base sólida em comunicação digital, branding e estratégia de conteúdo' },
+                    { type: 'cert', icon: 'fa-certificate', title: 'Marketing Digital', institution: 'Google Digital Garage', year: '2024', desc: 'Fundamentos de marketing digital, SEO e análise de dados' },
+                    { type: 'cert', icon: 'fa-certificate', title: 'SEO & Estratégia Digital', institution: 'Curso Especializado', year: '2024', desc: 'Otimização orgânica, intenção de busca e posicionamento estratégico em redes sociais' },
+                    { type: 'course', icon: 'fa-book', title: 'Social Media Strategy', institution: 'Curso Online', year: '2023', desc: 'Estratégia completa para crescimento orgânico e pago' }
+                ]
+            },
+            parcerias: {
+                visible: false,
+                title: 'Clientes & Parcerias',
+                subtitle: 'Marcas e projetos que confiam no meu trabalho',
+                items: [{ icon: '💼', name: 'Nome da Marca', category: 'Segmento' }]
+            },
+            depoimentos: {
+                visible: false,
+                title: 'O Que Dizem',
+                subtitle: 'Depoimentos de clientes e parceiros',
+                items: [{ stars: 5, text: 'Resultado incrível com a gestão das nossas redes sociais!', name: 'Nome do Cliente', role: 'Cargo · Empresa', initials: 'NC', color: 'linear-gradient(135deg,#C9A84C,#9A7A2A)' }]
+            },
+            contato: {
+                visible: true,
+                title: 'Vamos Trabalhar Juntos',
+                subtitle: 'Pronta para o seu projeto',
+                text: 'Entre em contato para conversarmos sobre como posso ajudar sua marca a crescer nas redes sociais. Retorno em até 24 horas úteis.',
+                whatsapp: '', email: '', instagram: '', tiktok: '', youtube: '', linkedin: '', pinterest: '', twitter: ''
+            }
+        };
+
+        const SK_PWD = 'lva_pwd_v3'; // chave separada — senha nunca vai pro JSON exportável
+
+        // ── loadData: Firebase primeiro, localStorage como fallback ──────────────
+        async function loadData() {
+            // senha sempre do localStorage (nunca no Firebase)
+            const storedPwd = localStorage.getItem(SK_PWD);
+
+            if (window._fbReady) {
+                try {
+                    const remote = await window._fb.loadData();
+                    if (remote) {
+                        D = remote;
+                        // preenche chaves ausentes com defaults
+                        Object.keys(DEFAULTS).forEach(k => {
+                            if (!(k in D)) D[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
+                        });
+                        D.meta.password = storedPwd || DEFAULTS.meta.password;
+                        return;
+                    }
+                } catch(e) {
+                    console.warn('Firebase loadData falhou, usando localStorage:', e);
+                }
+            }
+            // fallback localStorage
+            const stored = localStorage.getItem(SK);
+            D = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULTS));
+            Object.keys(DEFAULTS).forEach(k => {
+                if (!(k in D)) D[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
+            });
+            D.meta.password = storedPwd || DEFAULTS.meta.password;
+        }
+
+        // ── saveData: Firebase + localStorage (fallback) ──────────────────────────
+        async function saveData() {
+            // senha sempre em localStorage separado
+            localStorage.setItem(SK_PWD, D.meta.password);
+
+            // tenta salvar no Firebase
+            if (window._fbReady) {
+                try {
+                    await window._fb.saveData(D);
+                    // também salva no localStorage como cache offline
+                    _saveLocalFallback();
+                    return;
+                } catch(e) {
+                    console.warn('Firebase saveData falhou, salvando localmente:', e);
+                }
+            }
+            _saveLocalFallback();
+        }
+
+        function _stripHeavyData(D) {
+            // Remove base64 pesados antes de salvar (Firestore 1MB limit)
+            const toSave = JSON.parse(JSON.stringify(D));
+            delete toSave.meta.password;
+            // foto de perfil: se tiver URL do Storage, remove base64
+            if (toSave.identity && toSave.identity.photoPath) {
+                // mantém só a URL (já está em identity.photo como URL do Storage)
+                // se identity.photo for base64 (>500 chars sem http), limpa
+                const ph = toSave.identity.photo || '';
+                if (ph.startsWith('data:')) delete toSave.identity.photo;
+            }
+            if (toSave.portfolio && toSave.portfolio.posts) {
+                toSave.portfolio.posts = toSave.portfolio.posts.map(p => {
+                    const c = Object.assign({}, p);
+                    // vídeo base64 nunca persiste
+                    if (c.type === 'reel') delete c.video;
+                    // imagem base64: se tiver imagePath (URL no Storage), remove base64
+                    if (c.imagePath) {
+                        const img = c.image || '';
+                        if (img.startsWith('data:')) delete c.image;
+                    }
+                    return c;
+                });
+            }
+            return toSave;
+        }
+
+        function _saveLocalFallback() {
+            try {
+                const toSave = _stripHeavyData(D);
+                localStorage.setItem(SK, JSON.stringify(toSave));
+            } catch(e) {
+                if (e.name === 'QuotaExceededError') console.warn('localStorage cheio');
+            }
+        }
+
+        function gp(path) { return path.split('.').reduce((obj, key) => obj?.[key], D); }
+
+        function sp(path, val) {
+            const keys = path.split('.');
+            let obj = D;
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!(keys[i] in obj)) obj[keys[i]] = {};
+                obj = obj[keys[i]];
+            }
+            obj[keys[keys.length - 1]] = val;
+        }
+
+        function buildNav() {
+            const links = [
+                { text: 'Sobre',     href: '#sobre' },
+                { text: 'Serviços',  href: '#servicos' },
+                { text: 'Processo',  href: '#processo' },
+                { text: 'Portfólio', href: '#portfolio' },
+                { text: 'Formação',  href: '#formacao' },
+                D.metricas.visible    ? { text: 'Métricas',    href: '#metricas' }    : null,
+                D.parcerias.visible   ? { text: 'Parcerias',   href: '#parcerias' }   : null,
+                D.depoimentos.visible ? { text: 'Depoimentos', href: '#depoimentos' } : null
+            ].filter(Boolean);
+            const logo = `${D.identity.name1} <strong>${D.identity.name2}</strong>`;
+            return `<nav><div class="nav-logo">${logo}</div><button class="nav-toggle" id="nav-toggle"><i class="fas fa-bars"></i></button><ul class="nav-links">${links.map(l => `<li><a href="${l.href}">${l.text}</a></li>`).join('')}<li><a href="#contato" class="nav-cta">Contato</a></li></ul></nav>`;
+        }
+
+        function buildHero() {
+            const { name1, name2, photo, subtitle, bio } = D.identity;
+            const { pill, show_badges, b1_icon, b1_label, b1_value, b2_icon, b2_label, b2_value, cta1_text, cta1_link, cta2_text, cta2_link } = D.hero;
+            const photoHtml = photo
+                ? `<img src="${photo}" alt="${name1}" />`
+                : `<div class="image-placeholder"><i class="fas fa-camera"></i><p>Adicione sua foto aqui</p><p style="font-size:0.7rem;margin-top:0.4rem;opacity:0.5;">Use o painel Admin → Identidade</p></div>`;
+            const badges = show_badges ? `<div class="hero-badges">
+                <div class="badge"><span class="badge-icon">${b1_icon}</span><span>${b1_label}: <strong>${b1_value}</strong></span></div>
+                <div class="badge"><span class="badge-icon">${b2_icon}</span><span>${b2_label}: <strong>${b2_value}</strong></span></div>
+            </div>` : '';
+            return `
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-pill">${pill}</div>
+      <h1 class="hero-name"><span>${name1}</span><br>${name2}</h1>
+      <p class="hero-subtitle">${subtitle}</p>
+      <p class="hero-bio">${bio}</p>
+      <div class="hero-ctas">
+        <a href="${cta1_link}" class="cta-btn cta-primary">${cta1_text}</a>
+        <a href="${cta2_link}" class="cta-btn cta-secondary">${cta2_text}</a>
+      </div>
+      ${badges}
+    </div>
+    <div class="hero-image">
+      <div class="image-frame" id="photo-upload-frame">${photoHtml}</div>
+    </div>
+  </div>
+</section>`;
+        }
+
+        function buildSobre() {
+            const { visible, text1, text2, highlights } = D.sobre;
+            if (!visible) return '';
+            return `<section id="sobre" class="alt"><div class="container"><div class="section-heading"><h2>Sobre Mim</h2></div><div class="about-grid"><div class="about-text">${text1}</div><div class="about-text">${text2}</div></div><div class="highlights">${highlights.map(h => `<div class="highlight-card fade-in"><div class="highlight-icon"><i class="fas ${h.icon}"></i></div><h3 class="highlight-title">${h.title}</h3><p class="highlight-text">${h.text}</p></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildServicos() {
+            const { visible, title, subtitle, items } = D.servicos;
+            if (!visible) return '';
+            return `<section id="servicos"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="services-grid">${items.map((s, i) => `<div class="service-card fade-in"><div class="service-icon"><i class="fas ${s.icon}"></i></div><h3 class="service-title">${s.title}</h3><p class="service-desc">${s.desc}</p><div class="service-tags">${s.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')}</div></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildProcesso() {
+            const { visible, title, subtitle, items } = D.processo;
+            if (!visible) return '';
+            return `<section id="processo" class="alt"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="process-steps">${items.map(p => `<div class="step fade-in"><div class="step-number">${p.num}</div><div class="step-icon"><i class="fas ${p.icon}"></i></div><h3 class="step-title">${p.title}</h3><p class="step-desc">${p.desc}</p></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildFerramentas() {
+            const { visible, title, subtitle, categories } = D.ferramentas;
+            if (!visible) return '';
+            return `<section id="ferramentas"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="tools-grid">${categories.map(c => `<div class="tool-category fade-in"><div class="tool-header"><div class="tool-icon"><i class="fas ${c.icon}"></i></div><div class="tool-name">${c.name}</div></div><div class="tool-items">${c.items.split(',').map(i => `<span class="tool-pill">${i.trim()}</span>`).join('')}</div></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildPortfolio() {
+            const { visible, title, subtitle, username, posts } = D.portfolio;
+            if (!visible) return '';
+            const items = posts.map((p, idx) => {
+                if (p.type === 'reel') {
+                    // videoURL = URL permanente do Firebase Storage; video = base64 em memória (fallback)
+                    const videoSrc = p.videoURL || p.video || null;
+                    if (videoSrc) {
+                        const thumb = p.thumb ? `poster="${p.thumb}"` : '';
+                        return `<div class="portfolio-item fade-in reel-item" onmouseenter="this.querySelector('video').play()" onmouseleave="this.querySelector('video').pause()">
+                            <div class="portfolio-bg" style="background:#111;position:relative;">
+                                <video src="${videoSrc}" ${thumb} muted loop playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;"></video>
+                                <div class="reel-play-hint"><div class="reel-play-icon"><i class="fas fa-play"></i></div></div>
+                                <div class="reel-badge"><i class="fab fa-instagram"></i> Reel</div>
+                            </div>
+                            <div class="portfolio-overlay"><div class="portfolio-info"><div class="portfolio-category">${p.category}</div><div class="portfolio-caption">${p.caption}</div></div></div>
+                        </div>`;
+                    } else {
+                        // sem vídeo — placeholder instrucional
+                        return `<div class="portfolio-item fade-in reel-item">
+                            <div class="portfolio-bg" style="background:${p.gradient||'linear-gradient(135deg,#1a0d20,#0d0a18)'};position:relative;">
+                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:0.7rem;padding:1rem;text-align:center;">
+                                    <i class="fab fa-instagram" style="font-size:2.5rem;color:#c13584;opacity:0.8;"></i>
+                                    <span style="font-size:0.7rem;color:var(--t2);line-height:1.4;">Faça upload do vídeo<br>no painel Admin → Portfólio</span>
+                                </div>
+                                <div class="reel-badge"><i class="fab fa-instagram"></i> Reel</div>
+                            </div>
+                            <div class="portfolio-overlay"><div class="portfolio-info"><div class="portfolio-category">${p.category}</div><div class="portfolio-caption">${p.caption}</div></div></div>
+                        </div>`;
+                    }
+                }
+                // post normal (imagem)
+                return `<div class="portfolio-item fade-in"><div class="portfolio-bg" style="background: ${p.image ? 'none' : p.gradient};">${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="${p.caption}" />` : `<div class="portfolio-icon" style="color: ${p.icon_color};"><i class="fas ${p.icon}"></i></div>`}</div><div class="portfolio-overlay"><div class="portfolio-info"><div class="portfolio-category">${p.category}</div><div class="portfolio-caption">${p.caption}</div></div></div></div>`;
+            }).join('');
+            return `<section id="portfolio" class="alt"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p><p style="font-size: 0.8rem; color: var(--gold); margin-top: 0.5rem;">${username}</p></div><div class="portfolio-grid">${items}</div></div></section>`;
+        }
+
+        function buildFormacao() {
+            const { visible, title, subtitle, items } = D.formacao;
+            if (!visible) return '';
+            return `<section id="formacao"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="timeline fade-in">${items.map(i => `<div class="timeline-item"><div class="timeline-dot"></div><span class="timeline-icon"><i class="fas ${i.icon}"></i></span><div class="timeline-title">${i.title}</div><div class="timeline-institution">${i.institution}</div><div class="timeline-year">${i.year}</div><div class="timeline-desc">${i.desc}</div></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildMetricas() {
+            const { visible, items } = D.metricas;
+            if (!visible) return '';
+            return `<section id="metricas" class="alt"><div class="container"><div class="section-heading"><h2>Métricas & Desempenho</h2><p>Números que falam por si</p></div><div class="metrics-grid">${items.map((m, i) => `<div class="metric-card fade-in"><div class="metric-icon"><i class="fas ${m.icon}"></i></div><div class="metric-value">${m.value}</div><div class="metric-label">${m.label}</div></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildParcerias() {
+            const { visible, title, subtitle, items } = D.parcerias;
+            if (!visible) return '';
+            return `<section id="parcerias"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="partners-grid">${items.map(p => `<div class="partner-card fade-in"><div class="partner-icon">${p.icon}</div><h3 class="partner-name">${p.name}</h3><p class="partner-category">${p.category}</p></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildDepoimentos() {
+            const { visible, title, subtitle, items } = D.depoimentos;
+            if (!visible) return '';
+            return `<section id="depoimentos" class="alt"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="testimonials-grid">${items.map(t => `<div class="testimonial-card fade-in"><div class="testimonial-gradient" style="background: ${t.color}; opacity: 0.15;"></div><div class="testimonial-content"><div class="testimonial-stars">${Array(t.stars).fill('<span class="star">★</span>').join('')}</div><p class="testimonial-text">"${t.text}"</p><div class="testimonial-author"><div class="author-avatar" style="background: ${t.color};">${t.initials}</div><div class="author-info"><h4>${t.name}</h4><div class="author-role">${t.role}</div></div></div></div></div>`).join('')}</div></div></section>`;
+        }
+
+        function buildContato() {
+            const { visible, title, subtitle, text, whatsapp, email, instagram, tiktok, youtube, linkedin, pinterest, twitter } = D.contato;
+            if (!visible) return '';
+            let btns = '';
+            if (whatsapp) btns += `<a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" class="contact-btn contact-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
+            if (email) btns += `<a href="mailto:${email}" class="contact-btn contact-email"><i class="fas fa-envelope"></i> Email</a>`;
+            let social = '';
+            if (instagram) social += `<a href="https://instagram.com/${instagram.replace('@', '')}" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>`;
+            if (tiktok) social += `<a href="https://tiktok.com/@${tiktok.replace('@', '')}" class="social-link" target="_blank"><i class="fab fa-tiktok"></i></a>`;
+            if (youtube) social += `<a href="https://youtube.com/${youtube}" class="social-link" target="_blank"><i class="fab fa-youtube"></i></a>`;
+            if (linkedin) social += `<a href="https://linkedin.com/in/${linkedin}" class="social-link" target="_blank"><i class="fab fa-linkedin"></i></a>`;
+            if (pinterest) social += `<a href="https://pinterest.com/${pinterest}" class="social-link" target="_blank"><i class="fab fa-pinterest"></i></a>`;
+            if (twitter) social += `<a href="https://twitter.com/${twitter.replace('@', '')}" class="social-link" target="_blank"><i class="fab fa-x-twitter"></i></a>`;
+            return `<section id="contato"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><p style="max-width: 500px; margin: 0 auto 2rem; font-size: 0.95rem; color: var(--t2);">${text}</p><div class="contact-buttons fade-in">${btns}</div>${social ? `<div class="contact-divider"></div><div class="social-links fade-in">${social}</div>` : ''}</div></section>`;
+        }
+
+        function buildFooter() {
+            const yr = new Date().getFullYear();
+            const name = `${D.identity.name1} ${D.identity.name2}`;
+            return `<footer><div class="footer-content"><div class="footer-logo">${name}</div><div class="footer-niches"><span class="niche-tag">Social Media</span><span class="niche-tag">Estratégia Digital</span><span class="niche-tag">SEO</span><span class="niche-tag">Intenção Estratégica</span></div><p>&copy; ${yr} ${name} · Todos os direitos reservados.</p></div></footer>`;
+        }
+
+        function renderAll() {
+            document.getElementById('root').innerHTML = buildNav() + buildHero() + buildSobre() + buildServicos() + buildProcesso() + buildFerramentas() + buildPortfolio() + buildFormacao() + buildMetricas() + buildParcerias() + buildDepoimentos() + buildContato() + buildFooter();
+            initAnimations();
+            initNav();
+            initPhotoUpload();
+            document.title = D.meta.title;
+        }
+
+        function initAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('section').forEach(s => observer.observe(s));
+        }
+
+        function initNav() {
+            const toggle = document.getElementById('nav-toggle');
+            const links = document.querySelector('.nav-links');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => toggle.classList.toggle('open'));
+                links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => toggle.classList.remove('open')));
+            }
+        }
+
+        function initPhotoUpload() {
+            // Upload de foto disponível somente pelo painel Admin → Identidade
+        }
+
+        let curTab = 'identidade';
+
+        function openAdminLogin() {
+            document.getElementById('adm-login').classList.remove('hidden');
+            document.getElementById('adm-pwd').focus();
+        }
+
+        async function hashPwd(str) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        async function checkPwd() {
+            const pwd = document.getElementById('adm-pwd').value;
+            const h = await hashPwd(pwd);
+            if (h === D.meta.password) {
+                document.getElementById('adm-login').classList.add('hidden');
+                openAdmin();
+            } else {
+                notify('Senha incorreta', 'error');
+            }
+        }
+
+        async function updatePassword(newPwd) {
+            if (!newPwd) return;
+            const h = await hashPwd(newPwd);
+            sp('meta.password', h);
+            localStorage.setItem(SK_PWD, h);
+            notify('Senha alterada!', 'success');
+        }
+
+        function openAdmin() {
+            document.getElementById('adm-panel').classList.add('show');
+            renderAdminSidebar();
+            showTab('identidade');
+        }
+
+        function closeAdmin() {
+            document.getElementById('adm-panel').classList.remove('show');
+        }
+
+        function renderAdminSidebar() {
+            const tabs = [
+                { id: 'identidade', label: 'Identidade', icon: 'fa-user' },
+                { id: 'hero', label: 'Hero', icon: 'fa-image' },
+                { id: 'sobre', label: 'Sobre', icon: 'fa-info-circle' },
+                { id: 'servicos', label: 'Serviços', icon: 'fa-briefcase' },
+                { id: 'processo', label: 'Processo', icon: 'fa-map' },
+                { id: 'ferramentas', label: 'Ferramentas', icon: 'fa-tools' },
+                { id: 'portfolio', label: 'Portfólio', icon: 'fa-images' },
+                { id: 'formacao', label: 'Formação', icon: 'fa-graduation-cap' },
+                { id: 'metricas', label: 'Métricas', icon: 'fa-chart-bar' },
+                { id: 'parcerias', label: 'Parcerias', icon: 'fa-handshake' },
+                { id: 'depoimentos', label: 'Depoimentos', icon: 'fa-comments' },
+                { id: 'contato', label: 'Contato', icon: 'fa-envelope' },
+                { id: 'cores', label: 'Cores', icon: 'fa-palette' },
+                { id: 'config', label: 'Config', icon: 'fa-cog' }
+            ];
+            document.getElementById('adm-sidebar').innerHTML = tabs.map(t => `<div class="adm-tab ${curTab === t.id ? 'active' : ''}" onclick="showTab('${t.id}')"><i class="fas ${t.icon}"></i><span>${t.label}</span></div>`).join('');
+        }
+
+        function showTab(t) {
+            curTab = t;
+            renderAdminSidebar();
+            document.getElementById('adm-content').innerHTML = TABS[t]();
+        }
+
+        function field(label, inputHTML) {
+            return `<div class="adm-field"><label>${label}</label>${inputHTML}</div>`;
+        }
+
+        /* escapa HTML para uso seguro em atributos e conteúdo */
+        function esc(s) {
+            return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function inp(path, placeholder = '') {
+            const val = esc(gp(path) || '');
+            return `<input type="text" value="${val}" placeholder="${esc(placeholder)}" onchange="sp('${path}', this.value)" />`;
+        }
+
+        function txa(path, rows = 3) {
+            const val = esc(gp(path) || '');
+            return `<textarea rows="${rows}" onchange="sp('${path}', this.value)">${val}</textarea>`;
+        }
+
+        function tog(path, label) {
+            const checked = gp(path);
+            return `<div class="adm-toggle"><label>${label}</label><div class="toggle-switch ${checked ? 'active' : ''}" onclick="toggleSetting(this, '${path}')"><div class="toggle-knob"></div></div></div>`;
+        }
+
+        function toggleSetting(el, path) {
+            el.classList.toggle('active');
+            sp(path, el.classList.contains('active'));
+        }
+
+        /* mapa de chaves de array por seção */
+        const SECT_KEYS = { sobre: 'highlights', ferramentas: 'categories', portfolio: 'posts' };
+        function getArrKey(section) { return SECT_KEYS[section] || 'items'; }
+
+        function addItem(section, defaultItem = {}) {
+            const k = getArrKey(section);
+            if (!D[section][k]) D[section][k] = [];
+            D[section][k].push(defaultItem);
+            showTab(curTab);
+        }
+
+        function removeItem(section, index) {
+            const k = getArrKey(section);
+            D[section][k].splice(index, 1);
+            showTab(curTab);
+        }
+
+        const TABS = {
+            identidade: () => {
+                const photoPreview = D.identity.photo ? `<img src="${D.identity.photo}" class="photo-preview" alt="Foto" />` : '';
+                return `${field('Foto do Perfil', `<label class="adm-file-label"><i class="fas fa-cloud-upload-alt"></i> Clique para upload<input type="file" accept="image/*" onchange="handlePhotoUpload(event)" /></label>${photoPreview}`)}${field('Primeiro Nome', inp('identity.name1'))}${field('Sobrenome', inp('identity.name2'))}${field('Título', inp('identity.title'))}${field('Subtítulo', inp('identity.subtitle'))}${field('Bio', txa('identity.bio', 4))}${field('Localização', inp('identity.location'))}${field('Disponibilidade', inp('identity.availability'))}`;
+            },
+            hero: () => {
+                return `${field('Pill', inp('hero.pill'))}${tog('hero.show_badges', 'Mostrar Badges')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Badge 1</h3>${field('Ícone', inp('hero.b1_icon'))}${field('Label', inp('hero.b1_label'))}${field('Valor', inp('hero.b1_value'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Badge 2</h3>${field('Ícone', inp('hero.b2_icon'))}${field('Label', inp('hero.b2_label'))}${field('Valor', inp('hero.b2_value'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">CTA 1</h3>${field('Texto', inp('hero.cta1_text'))}${field('Link', inp('hero.cta1_link'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">CTA 2</h3>${field('Texto', inp('hero.cta2_text'))}${field('Link', inp('hero.cta2_link'))}`;
+            },
+            sobre: () => {
+                return `${tog('sobre.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Parágrafo 1', txa('sobre.text1', 4))}${field('Parágrafo 2', txa('sobre.text2', 4))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Destaques</h3>${D.sobre.highlights.map((h, i) => `<div class="adm-item"><div class="adm-item-header"><span>Destaque ${i + 1}</span><button class="adm-item-remove" onclick="removeItem('sobre', ${i})">Remover</button></div>${field('Ícone', `<input type="text" value="${h.icon}" onchange="sp('sobre.highlights.${i}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${h.title}" onchange="sp('sobre.highlights.${i}.title', this.value)" />`)}${field('Texto', `<textarea onchange="sp('sobre.highlights.${i}.text', this.value)">${h.text}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('sobre', {icon: 'fa-star', title: 'Novo', text: 'Descrição'})">+ Adicionar</button>`;
+            },
+            servicos: () => {
+                return `${tog('servicos.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('servicos.title'))}${field('Subtítulo', inp('servicos.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Serviços</h3>${D.servicos.items.map((s, i) => `<div class="adm-item"><div class="adm-item-header"><span>${s.title}</span><button class="adm-item-remove" onclick="removeItem('servicos', ${i})">Remover</button></div>${field('Ícone', `<input type="text" value="${s.icon}" onchange="sp('servicos.items.${i}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${s.title}" onchange="sp('servicos.items.${i}.title', this.value)" />`)}${field('Desc', `<textarea onchange="sp('servicos.items.${i}.desc', this.value)">${s.desc}</textarea>`)}${field('Tags', `<input type="text" value="${s.tags}" onchange="sp('servicos.items.${i}.tags', this.value)" />`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('servicos', {icon: 'fa-star', title: 'Novo', desc: 'Desc', tags: ''})">+ Adicionar</button>`;
+            },
+            processo: () => {
+                return `${tog('processo.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('processo.title'))}${field('Subtítulo', inp('processo.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Passos</h3>${D.processo.items.map((p, i) => `<div class="adm-item"><div class="adm-item-header"><span>${p.title}</span><button class="adm-item-remove" onclick="removeItem('processo', ${i})">Remover</button></div>${field('Num', `<input type="text" value="${p.num}" onchange="sp('processo.items.${i}.num', this.value)" />`)}${field('Ícone', `<input type="text" value="${p.icon}" onchange="sp('processo.items.${i}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${p.title}" onchange="sp('processo.items.${i}.title', this.value)" />`)}${field('Desc', `<textarea onchange="sp('processo.items.${i}.desc', this.value)">${p.desc}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('processo', {num: '05', icon: 'fa-star', title: 'Novo', desc: 'Desc'})">+ Adicionar</button>`;
+            },
+            ferramentas: () => {
+                return `${tog('ferramentas.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('ferramentas.title'))}${field('Subtítulo', inp('ferramentas.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Categorias</h3>${D.ferramentas.categories.map((c, i) => `<div class="adm-item"><div class="adm-item-header"><span>${c.name}</span><button class="adm-item-remove" onclick="removeItem('ferramentas', ${i})">Remover</button></div>${field('Nome', `<input type="text" value="${c.name}" onchange="sp('ferramentas.categories.${i}.name', this.value)" />`)}${field('Ícone', `<input type="text" value="${c.icon}" onchange="sp('ferramentas.categories.${i}.icon', this.value)" />`)}${field('Itens', `<textarea onchange="sp('ferramentas.categories.${i}.items', this.value)">${c.items}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('ferramentas', {name: 'Nova', icon: 'fa-star', items: 'Item1,Item2'})">+ Adicionar</button>`;
+            },
+            portfolio: () => {
+                return `${tog('portfolio.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('portfolio.title'))}${field('Subtítulo', inp('portfolio.subtitle'))}${field('Username', inp('portfolio.username'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Posts & Reels</h3>${D.portfolio.posts.map((p, i) => {
+                    const isReel = p.type === 'reel';
+                    const videoSrcAdmin = p.videoURL || p.video || null;
+                    const videoBlock = isReel ? (videoSrcAdmin
+                        ? `<div style="margin-top:0.5rem;border-radius:6px;overflow:hidden;position:relative;aspect-ratio:1;max-height:180px;">
+                            <video src="${videoSrcAdmin}" muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block;" onmouseenter="this.play()" onmouseleave="this.pause()"></video>
+                            ${p.videoURL ? '<div style=\'position:absolute;bottom:4px;left:4px;background:rgba(0,150,0,0.8);color:white;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:4px;\'>☁️ Salvo no Firebase</div>' : '<div style=\'position:absolute;bottom:4px;left:4px;background:rgba(200,150,0,0.85);color:white;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:4px;\'>⚠️ Memória temporária</div>'}
+                            <button onclick="removePortfolioVideo(${i})" style="position:absolute;top:4px;right:4px;background:rgba(183,110,121,0.85);color:white;border:none;border-radius:4px;padding:0.2rem 0.5rem;font-size:0.65rem;cursor:pointer;">✕ Remover vídeo</button>
+                           </div>`
+                        : `<div style="background:rgba(193,53,132,0.08);border:1px dashed rgba(193,53,132,0.4);border-radius:6px;padding:0.6rem;margin-top:0.4rem;font-size:0.72rem;color:var(--t2);text-align:center;">Nenhum vídeo carregado</div>`)
+                        : '';
+                    return `<div class="adm-item"><div class="adm-item-header"><span>${isReel ? '🎬 Reel ' : '🖼️ Post '}${i + 1}</span><button class="adm-item-remove" onclick="removeItem('portfolio', ${i})">Remover</button></div>
+${field('Tipo', `<select onchange="sp('portfolio.posts.${i}.type', this.value); showTab('portfolio');"><option value="post" ${!isReel ? 'selected' : ''}>Imagem / Post</option><option value="reel" ${isReel ? 'selected' : ''}>Reel (Vídeo)</option></select>`)}
+${isReel
+    ? field('Arquivo de Vídeo', `<label class="adm-file-label" style="border-color:rgba(193,53,132,0.4);"><i class="fab fa-instagram" style="color:#c13584;"></i> ${p.video ? 'Trocar vídeo do Reel' : 'Upload do vídeo (.mp4, .mov)'}<input type="file" accept="video/*" onchange="handlePortfolioVideo(event, ${i})" /></label><p style="font-size:0.68rem;color:var(--t2);margin-top:0.3rem;">💡 Baixe o vídeo do Reel pelo Instagram e faça upload aqui. Máx 80MB.</p>${videoBlock}`)
+    : field('Imagem', `<label class="adm-file-label"><i class="fas fa-image"></i> ${p.image ? 'Trocar imagem' : 'Upload de imagem'}<input type="file" accept="image/*" onchange="handlePortfolioImage(event, ${i})" /></label>${p.image ? `<img src="${p.image}" style="width:100%;max-height:160px;object-fit:cover;border-radius:6px;margin-top:0.5rem;" />` : ''}`)
+}
+${field('Categoria', `<input type="text" value="${p.category}" onchange="sp('portfolio.posts.${i}.category', this.value)" />`)}${field('Caption', `<input type="text" value="${p.caption}" onchange="sp('portfolio.posts.${i}.caption', this.value)" />`)}${!isReel ? field('Gradiente (fundo sem imagem)', `<input type="text" value="${p.gradient || ''}" onchange="sp('portfolio.posts.${i}.gradient', this.value)" />`) : ''}</div>`;
+                }).join('')}<button class="adm-add-btn" onclick="addItem('portfolio', {type:'post', gradient: 'linear-gradient(135deg,#3d1a20,#1a0d12)', icon: 'fa-star', icon_color: 'rgba(201,168,76,.38)', category: 'Novo', caption: 'Desc', image: null})">+ Adicionar Post</button>
+<button class="adm-add-btn" style="margin-top:0.5rem;border-color:rgba(193,53,132,0.5);color:#c13584;" onclick="addItem('portfolio', {type:'reel', video:null, thumb:null, category:'Reel', caption:'Descrição do reel', gradient:'linear-gradient(135deg,#1a0d20,#0d0a18)'})">+ Adicionar Reel</button>`;
+            },
+            formacao: () => {
+                return `${tog('formacao.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('formacao.title'))}${field('Subtítulo', inp('formacao.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Itens</h3>${D.formacao.items.map((i, idx) => `<div class="adm-item"><div class="adm-item-header"><span>${i.title}</span><button class="adm-item-remove" onclick="removeItem('formacao', ${idx})">Remover</button></div>${field('Tipo', `<select onchange="sp('formacao.items.${idx}.type', this.value)"><option value="graduation" ${i.type === 'graduation' ? 'selected' : ''}>Graduação</option><option value="cert" ${i.type === 'cert' ? 'selected' : ''}>Certificado</option><option value="course" ${i.type === 'course' ? 'selected' : ''}>Curso</option></select>`)}${field('Ícone', `<input type="text" value="${i.icon}" onchange="sp('formacao.items.${idx}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${i.title}" onchange="sp('formacao.items.${idx}.title', this.value)" />`)}${field('Instituição', `<input type="text" value="${i.institution}" onchange="sp('formacao.items.${idx}.institution', this.value)" />`)}${field('Ano', `<input type="text" value="${i.year}" onchange="sp('formacao.items.${idx}.year', this.value)" />`)}${field('Desc', `<textarea onchange="sp('formacao.items.${idx}.desc', this.value)">${i.desc}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('formacao', {type: 'course', icon: 'fa-book', title: 'Novo', institution: 'Inst', year: '2024', desc: 'Desc'})">+ Adicionar</button>`;
+            },
+            metricas: () => {
+                return `${tog('metricas.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Métricas</h3>${D.metricas.items.map((m, i) => `<div class="adm-item"><div class="adm-item-header"><span>${m.label}</span><button class="adm-item-remove" onclick="removeItem('metricas', ${i})">Remover</button></div>${field('Valor', `<input type="text" value="${m.value}" onchange="sp('metricas.items.${i}.value', this.value)" />`)}${field('Label', `<input type="text" value="${m.label}" onchange="sp('metricas.items.${i}.label', this.value)" />`)}${field('Ícone', `<input type="text" value="${m.icon}" onchange="sp('metricas.items.${i}.icon', this.value)" />`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('metricas', {value: '—', label: 'Nova', icon: 'fa-star'})">+ Adicionar</button>`;
+            },
+            parcerias: () => {
+                return `${tog('parcerias.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('parcerias.title'))}${field('Subtítulo', inp('parcerias.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Parcerias</h3>${D.parcerias.items.map((p, i) => `<div class="adm-item"><div class="adm-item-header"><span>${p.name}</span><button class="adm-item-remove" onclick="removeItem('parcerias', ${i})">Remover</button></div>${field('Ícone', `<input type="text" value="${p.icon}" onchange="sp('parcerias.items.${i}.icon', this.value)" />`)}${field('Nome', `<input type="text" value="${p.name}" onchange="sp('parcerias.items.${i}.name', this.value)" />`)}${field('Categoria', `<input type="text" value="${p.category}" onchange="sp('parcerias.items.${i}.category', this.value)" />`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('parcerias', {icon: '💼', name: 'Nova', category: 'Seg'})">+ Adicionar</button>`;
+            },
+            depoimentos: () => {
+                return `${tog('depoimentos.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('depoimentos.title'))}${field('Subtítulo', inp('depoimentos.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Depoimentos</h3>${D.depoimentos.items.map((t, i) => `<div class="adm-item"><div class="adm-item-header"><span>${t.name}</span><button class="adm-item-remove" onclick="removeItem('depoimentos', ${i})">Remover</button></div>${field('Estrelas', `<input type="number" min="1" max="5" value="${t.stars}" onchange="sp('depoimentos.items.${i}.stars', parseInt(this.value))" />`)}${field('Texto', `<textarea onchange="sp('depoimentos.items.${i}.text', this.value)">${t.text}</textarea>`)}${field('Nome', `<input type="text" value="${t.name}" onchange="sp('depoimentos.items.${i}.name', this.value)" />`)}${field('Cargo', `<input type="text" value="${t.role}" onchange="sp('depoimentos.items.${i}.role', this.value)" />`)}${field('Iniciais', `<input type="text" value="${t.initials}" onchange="sp('depoimentos.items.${i}.initials', this.value)" />`)}${field('Cor', `<input type="text" value="${t.color}" onchange="sp('depoimentos.items.${i}.color', this.value)" />`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('depoimentos', {stars: 5, text: 'Incrível!', name: 'Cliente', role: 'Cargo', initials: 'CL', color: 'linear-gradient(135deg,#C9A84C,#9A7A2A)'})">+ Adicionar</button>`;
+            },
+            contato: () => {
+                return `${tog('contato.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('contato.title'))}${field('Subtítulo', inp('contato.subtitle'))}${field('Texto', txa('contato.text', 3))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Contato</h3>${field('WhatsApp', inp('contato.whatsapp', '5511999999999'))}${field('Email', inp('contato.email', 'seu@email.com'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Redes</h3>${field('Instagram', inp('contato.instagram', '@handle'))}${field('TikTok', inp('contato.tiktok', '@handle'))}${field('YouTube', inp('contato.youtube', 'canal'))}${field('LinkedIn', inp('contato.linkedin', 'user'))}${field('Pinterest', inp('contato.pinterest', 'user'))}${field('Twitter/X', inp('contato.twitter', '@handle'))}`;
+            },
+            cores: () => {
+                const c = D.colors || {};
+                const colorField = (label, key) => field(label, `<div style="display:flex;gap:0.5rem;align-items:center;"><input type="color" value="${c[key] || '#000000'}" style="width:48px;height:36px;padding:2px;border-radius:4px;cursor:pointer;border:1px solid var(--border-gold);background:var(--bgc);" onchange="sp('colors.${key}', this.value); applyColors();" /><input type="text" value="${c[key] || ''}" placeholder="#rrggbb" onchange="sp('colors.${key}', this.value); applyColors();" style="flex:1;" /></div>`);
+                return `<h3 style="color:var(--gold);font-size:0.9rem;margin-bottom:1rem;">🎨 Paleta de Cores</h3>
+<p style="color:var(--t2);font-size:0.75rem;margin-bottom:1.5rem;">As alterações são aplicadas em tempo real. Clique em "Salvar Alterações" para persistir.</p>
+<h4 style="color:var(--t2);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8rem;">Fundos</h4>
+${colorField('Fundo Principal', 'bg0')}
+${colorField('Fundo Alternado', 'bg1')}
+${colorField('Fundo Cards/Admin', 'bgc')}
+<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />
+<h4 style="color:var(--t2);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8rem;">Cor Primária (Gold)</h4>
+${colorField('Gold Principal', 'gold')}
+${colorField('Gold Claro', 'gold_l')}
+${colorField('Gold Escuro', 'gold_d')}
+<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />
+<h4 style="color:var(--t2);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8rem;">Cor de Destaque (Rose)</h4>
+${colorField('Rose Principal', 'rose')}
+${colorField('Rose Claro', 'rose_l')}
+<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />
+<h4 style="color:var(--t2);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8rem;">Textos</h4>
+${colorField('Texto Principal', 't1')}
+${colorField('Texto Secundário', 't2')}
+<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />
+<button class="adm-btn adm-btn-secondary" style="width:100%;margin-bottom:0.8rem;" onclick="D.colors={bg0:'#070707',bg1:'#101010',bgc:'#161616',gold:'#C9A84C',gold_l:'#E2C97E',gold_d:'#9A7A2A',rose:'#B76E79',rose_l:'#D49098',t1:'#F0EAD6',t2:'#95897a'}; applyColors(); showTab('cores'); notify('Cores resetadas', 'success');">↺ Resetar Cores Padrão</button>`;
+            },
+            config: () => {
+                return `<h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Configurações</h3>${field('Título da Página', inp('meta.title'))}${field('Nova Senha', `<input type="password" placeholder="Deixar em branco para não alterar" onchange="if(this.value) updatePassword(this.value)" />`)}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Resetar TODOS os dados?')) { D = JSON.parse(JSON.stringify(DEFAULTS)); localStorage.removeItem(SK_PWD); localStorage.removeItem(SK); applyColors(); saveData().then(() => { renderAll(); closeAdmin(); notify('Resetado', 'success'); }); }">Resetar Tudo</button><button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Deletar TODOS os dados?')) { localStorage.removeItem(SK); localStorage.removeItem(SK_PWD); location.reload(); }">Limpar Dados</button>`;
+            }
+        };
+
+        function applyColors() {
+            const c = D.colors || {};
+            const root = document.documentElement;
+            if (c.bg0)    root.style.setProperty('--bg0', c.bg0);
+            if (c.bg1)    root.style.setProperty('--bg1', c.bg1);
+            if (c.bgc)    root.style.setProperty('--bgc', c.bgc);
+            if (c.gold)   root.style.setProperty('--gold', c.gold);
+            if (c.gold_l) root.style.setProperty('--gold-l', c.gold_l);
+            if (c.gold_d) root.style.setProperty('--gold-d', c.gold_d);
+            if (c.rose)   root.style.setProperty('--rose', c.rose);
+            if (c.rose_l) root.style.setProperty('--rose-l', c.rose_l);
+            if (c.t1)     root.style.setProperty('--t1', c.t1);
+            if (c.t2)     root.style.setProperty('--t2', c.t2);
+            const g = c.gold || '#C9A84C';
+            const gl = c.gold_l || '#E2C97E';
+            const gd = c.gold_d || '#9A7A2A';
+            root.style.setProperty('--border', `rgba(${hexToRgb(g)}, 0.18)`);
+            root.style.setProperty('--border-gold', `rgba(${hexToRgb(g)}, 0.2)`);
+            root.style.setProperty('--grad', `linear-gradient(135deg, ${g}, ${gl}, ${gd})`);
+        }
+
+        function hexToRgb(hex) {
+            const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return r ? `${parseInt(r[1],16)}, ${parseInt(r[2],16)}, ${parseInt(r[3],16)}` : '201, 168, 76';
+        }
+
+        async function saveAndApply() {
+            try {
+                await saveData();
+                applyColors();
+                renderAll();
+                notify('Salvo com sucesso!', 'success');
+            } catch(e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    notify('Armazenamento local cheio. Dados salvos no Firebase.', 'error');
+                } else {
+                    notify('Erro ao salvar: ' + e.message, 'error');
+                    console.error('saveAndApply error:', e);
+                }
+            }
+        }
+
+        /**
+         * Comprime imagem para JPEG máx maxPx, qualidade quality.
+         * Retorna { dataUrl, blob } — blob para upload no Storage, dataUrl para preview local.
+         */
+        function compressImage(file, maxPx = 1200, quality = 0.78) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width > maxPx || height > maxPx) {
+                            if (width > height) { height = Math.round(height * maxPx / width); width = maxPx; }
+                            else { width = Math.round(width * maxPx / height); height = maxPx; }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width; canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        canvas.toBlob(blob => resolve({ dataUrl, blob }), 'image/jpeg', quality);
+                    };
+                    img.onerror = reject;
+                    img.src = evt.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handlePhotoUpload(e) {
+            if (!e.target.files[0]) return;
+            notify('Carregando foto...', 'success');
+            const { dataUrl, blob } = await compressImage(e.target.files[0], 800, 0.82);
+            sp('identity.photo', dataUrl); // preview imediato
+            showTab('identidade');
+            if (window._fbReady && window._fb) {
+                try {
+                    // remove foto antiga do Storage se existir
+                    const oldPath = D.identity.photoPath;
+                    if (oldPath) await window._fb.deleteImage(oldPath);
+                    const { url, path } = await window._fb.uploadImage(blob, 'photos', 'profile');
+                    sp('identity.photo', url);
+                    sp('identity.photoPath', path);
+                    await saveData();
+                    showTab('identidade');
+                    notify('Foto salva!', 'success');
+                } catch(err) {
+                    console.error('Upload foto falhou:', err);
+                    await saveData();
+                    notify('Foto salva localmente (Firebase indisponível)', 'error');
+                }
+            } else {
+                await saveData();
+            }
+        }
+
+        async function handlePortfolioImage(e, index) {
+            if (!e.target.files[0]) return;
+            notify('Carregando imagem...', 'success');
+            const { dataUrl, blob } = await compressImage(e.target.files[0], 1200, 0.78);
+            sp('portfolio.posts.' + index + '.image', dataUrl); // preview imediato
+            showTab('portfolio');
+            if (window._fbReady && window._fb) {
+                try {
+                    const oldPath = D.portfolio.posts[index] && D.portfolio.posts[index].imagePath;
+                    if (oldPath) await window._fb.deleteImage(oldPath);
+                    const { url, path } = await window._fb.uploadImage(blob, 'portfolio', 'post_' + index);
+                    sp('portfolio.posts.' + index + '.image', url);
+                    sp('portfolio.posts.' + index + '.imagePath', path);
+                    await saveData();
+                    showTab('portfolio');
+                    notify('Imagem salva!', 'success');
+                } catch(err) {
+                    console.error('Upload imagem falhou:', err);
+                    await saveData();
+                    notify('Erro no upload — imagem pode não aparecer no celular', 'error');
+                }
+            } else {
+                await saveData();
+            }
+        }
+
+        async function handlePortfolioVideo(e, index) {
+            if (!e.target.files[0]) return;
+            const file = e.target.files[0];
+            if (file.size > 300 * 1024 * 1024) {
+                notify('Vídeo muito grande (máx 300MB)', 'error');
+                return;
+            }
+            notify('Fazendo upload do vídeo...', 'success');
+
+            // 1. Lê o arquivo para gerar thumb e reprodução local imediata
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                const b64 = evt.target.result;
+                sp('portfolio.posts.' + index + '.video', b64); // memória — exibição imediata
+
+                // Gera thumbnail do primeiro frame
+                const vid = document.createElement('video');
+                vid.src = b64;
+                vid.currentTime = 0.5;
+                vid.addEventListener('seeked', async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400; canvas.height = 400;
+                    const ctx = canvas.getContext('2d');
+                    const vw = vid.videoWidth, vh = vid.videoHeight;
+                    const size = Math.min(vw, vh);
+                    ctx.drawImage(vid, (vw-size)/2, (vh-size)/2, size, size, 0, 0, 400, 400);
+                    const thumb = canvas.toDataURL('image/jpeg', 0.6);
+                    sp('portfolio.posts.' + index + '.thumb', thumb);
+                    showTab('portfolio');
+
+                    // 2. Upload para Firebase Storage (URL permanente)
+                    if (window._fbReady) {
+                        try {
+                            // remove vídeo antigo do Storage se existir
+                            const oldPath = D.portfolio.posts[index].videoPath;
+                            if (oldPath) await window._fb.deleteVideo(oldPath);
+
+                            const { url, path } = await window._fb.uploadVideo(file, index);
+                            sp('portfolio.posts.' + index + '.videoURL', url);
+                            sp('portfolio.posts.' + index + '.videoPath', path);
+                            sp('portfolio.posts.' + index + '.video', url); // aponta para URL permanente
+                            await saveData();
+                            showTab('portfolio');
+                            notify('Reel salvo permanentemente!', 'success');
+                        } catch(err) {
+                            console.error('Upload Firebase falhou:', err);
+                            await saveData();
+                            notify('Upload falhou — vídeo salvo localmente (some ao recarregar)', 'error');
+                        }
+                    } else {
+                        await saveData();
+                        notify('Firebase indisponível — vídeo em memória temporária', 'error');
+                    }
+                }, { once: true });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function removePortfolioVideo(index) {
+            const post = D.portfolio.posts[index];
+            if (post.videoPath && window._fbReady) {
+                try { await window._fb.deleteVideo(post.videoPath); } catch(e) {}
+            }
+            sp('portfolio.posts.' + index + '.video', null);
+            sp('portfolio.posts.' + index + '.videoURL', null);
+            sp('portfolio.posts.' + index + '.videoPath', null);
+            sp('portfolio.posts.' + index + '.thumb', null);
+            await saveData();
+            showTab('portfolio');
+        }
+
+        async function exportJSON() {
+            const toExport = JSON.parse(JSON.stringify(D));
+            delete toExport.meta.password; // nunca exporta senha
+            // remove vídeos base64 (pesados demais para JSON)
+            if (toExport.portfolio && toExport.portfolio.posts) {
+                toExport.portfolio.posts = toExport.portfolio.posts.map(p => {
+                    if (p.type === 'reel') { const c = Object.assign({}, p); delete c.video; return c; }
+                    return p;
+                });
+            }
+            const json = JSON.stringify(toExport, null, 2);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+            a.download = 'portfolio-data.json';
+            a.click();
+            notify('Exportado!', 'success');
+        }
+
+        function importJSON() {
+            document.getElementById('adm-import-file').click();
+        }
+
+        function handleImportFile(e) {
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    const currentPwd = D.meta.password;
+                    Object.assign(D, imported);
+                    D.meta.password = currentPwd;
+                    applyColors();
+                    await saveData();
+                    renderAll();
+                    notify('Importado!', 'success');
+                } catch (err) {
+                    notify('Erro ao importar', 'error');
+                }
+            };
+            reader.readAsText(e.target.files[0]);
+            e.target.value = '';
+        }
+
+        function notify(msg, type = 'success') {
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.textContent = msg;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.animation = 'slideUp 0.3s ease reverse';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const init = async () => {
+                await loadData();
+                applyColors();
+                renderAll();
+                document.getElementById('adm-fab').addEventListener('click', () => {
+                    openAdminLogin();
+                });
+                document.getElementById('adm-pwd').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') checkPwd();
+                });
+            };
+
+            // Se Firebase já carregou (module scripts são rápidos), inicia direto.
+            // Caso contrário aguarda o evento, com timeout de 4s para fallback.
+            if (window._fbReady) {
+                init();
+            } else {
+                let done = false;
+                const timeout = setTimeout(() => {
+                    if (!done) { done = true; console.warn('Firebase timeout — usando localStorage'); init(); }
+                }, 4000);
+                window.addEventListener('firebase-ready', () => {
+                    if (!done) { done = true; clearTimeout(timeout); init(); }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
