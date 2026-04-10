@@ -2959,7 +2959,7 @@
             const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
             const avatarHtml = photo ? `<img class="phone-avatar" src="${photo}" alt="${name1}" />` : `<div class="phone-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--bg1);"><i class="fas fa-user" style="color:var(--t2);font-size:1.8rem;"></i></div>`;
             let links = '';
-            if (whatsapp) links += `<a href="https://wa.me/${whatsapp.replace(/\D/g,'')}" class="phone-link" target="_blank"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp</a>`;
+            if (whatsapp) links += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" class="phone-link" target="_blank"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp</a>`;
             if (email) links += `<a href="mailto:${email}" class="phone-link" target="_blank"><i class="fas fa-envelope" style="color:var(--gold);"></i> ${email}</a>`;
             if (instagram) links += `<a href="https://instagram.com/${instagram.replace('@','')}" class="phone-link" target="_blank"><i class="fab fa-instagram" style="color:#c13584;"></i> ${instagram}</a>`;
             if (tiktok) links += `<a href="https://tiktok.com/@${tiktok.replace('@','')}" class="phone-link" target="_blank"><i class="fab fa-tiktok"></i> ${tiktok}</a>`;
@@ -2970,7 +2970,7 @@
             if (tiktok) socialBtns += `<a href="https://tiktok.com/@${tiktok.replace('@','')}" class="phone-social-btn tt" target="_blank"><i class="fab fa-tiktok"></i></a>`;
             if (linkedin) socialBtns += `<a href="https://linkedin.com/in/${linkedin}" class="phone-social-btn li" target="_blank"><i class="fab fa-linkedin"></i></a>`;
             if (youtube) socialBtns += `<a href="https://youtube.com/${youtube}" class="phone-social-btn yt" target="_blank"><i class="fab fa-youtube"></i></a>`;
-            if (whatsapp) socialBtns += `<a href="https://wa.me/${whatsapp.replace(/\D/g,'')}" class="phone-social-btn wa" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
+            if (whatsapp) socialBtns += `<a href="https://wa.me/${whatsapp.replace(/[^0-9]/g,'')}" class="phone-social-btn wa" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
             return `<section id="contato">
                 <div class="container" style="text-align:center;margin-bottom:3rem;">
                     <span class="section-tag">vamos conversar</span>
@@ -3313,20 +3313,34 @@ ${field('Categoria', `<input type="text" value="${p.category}" onchange="sp('por
             },
             reels_section: () => {
                 if (!D.reels) D.reels = { visible: true, title: 'Reels', subtitle: 'Conteúdo em vídeo', username: '@lauravieiraarruda', posts: [] };
-                return `${tog('reels.visible', 'Mostrar Seção Reels')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('reels.title'))}${field('Subtítulo', inp('reels.subtitle'))}${field('Username', inp('reels.username'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">🎬 Reels</h3>${D.reels.posts.map((p, i) => {
-                    const videoSrcAdmin = p.videoURL || p.video || null;
-                    const videoBlock = videoSrcAdmin
-                        ? \`<div style="margin-top:0.5rem;border-radius:6px;overflow:hidden;position:relative;aspect-ratio:9/16;max-height:180px;">
-                            <video src="\${videoSrcAdmin}" muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block;" onmouseenter="this.play()" onmouseleave="this.pause()"></video>
-                            \${p.videoURL ? '<div style=\'position:absolute;bottom:4px;left:4px;background:rgba(0,150,0,0.8);color:white;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:4px;\'>☁️ Firebase</div>' : ''}
-                            <button onclick="removeReelVideo(\${i})" style="position:absolute;top:4px;right:4px;background:rgba(183,110,121,0.85);color:white;border:none;border-radius:4px;padding:0.2rem 0.5rem;font-size:0.65rem;cursor:pointer;">✕ Remover</button>
-                           </div>\`
-                        : '<div style="background:rgba(193,53,132,0.08);border:1px dashed rgba(193,53,132,0.4);border-radius:6px;padding:0.6rem;margin-top:0.4rem;font-size:0.72rem;color:var(--t2);text-align:center;">Nenhum vídeo</div>';
-                    return \`<div class="adm-item"><div class="adm-item-header"><span>🎬 Reel \${i + 1}</span><button class="adm-item-remove" onclick="removeReelItem(\${i})">Remover</button></div>
-\${field('Vídeo', \`<label class="adm-file-label" style="border-color:rgba(193,53,132,0.4);"><i class="fab fa-instagram" style="color:#c13584;"></i> \${p.video || p.videoURL ? 'Trocar vídeo' : 'Upload do vídeo (.mp4, .mov)'}<input type="file" accept="video/*" onchange="handleReelVideo(event, \${i})" /></label><p style="font-size:0.68rem;color:var(--t2);margin-top:0.3rem;">💡 Baixe o vídeo do Reel e faça upload aqui. Máx 300MB.</p>\${videoBlock}\`)}
-\${field('Categoria', \`<input type="text" value="\${p.category||''}" onchange="sp('reels.posts.\${i}.category', this.value)" />\`)}
-\${field('Caption', \`<input type="text" value="\${p.caption||''}" onchange="sp('reels.posts.\${i}.caption', this.value)" />\`)}</div>\`;
-                }).join('')}<button class="adm-add-btn" style="border-color:rgba(193,53,132,0.5);color:#c13584;" onclick="addReelItem()">+ Adicionar Reel</button>`;
+                const reelItems = D.reels.posts.map((p, i) => {
+                    const src = p.videoURL || p.video || null;
+                    const vBlock = src
+                        ? '<div style="margin-top:0.5rem;border-radius:6px;overflow:hidden;position:relative;max-height:180px;">'
+                            + '<video src="' + src + '" muted loop playsinline style="width:100%;height:auto;object-fit:cover;display:block;" onmouseenter="this.play()" onmouseleave="this.pause()"></video>'
+                            + (p.videoURL ? '<div style="position:absolute;bottom:4px;left:4px;background:rgba(0,150,0,0.8);color:white;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:4px;">☁️ Firebase</div>' : '')
+                            + '<button onclick="removeReelVideo(' + i + ')" style="position:absolute;top:4px;right:4px;background:rgba(183,110,121,0.85);color:white;border:none;border-radius:4px;padding:0.2rem 0.5rem;font-size:0.65rem;cursor:pointer;">✕ Remover</button>'
+                            + '</div>'
+                        : '<div style="background:rgba(193,53,132,0.08);border:1px dashed rgba(193,53,132,0.4);border-radius:6px;padding:0.6rem;margin-top:0.4rem;font-size:0.72rem;color:var(--t2);text-align:center;">Nenhum vídeo carregado</div>';
+                    const lbl = (p.video || p.videoURL) ? 'Trocar vídeo' : 'Upload do vídeo (.mp4, .mov)';
+                    const catInput = '<input type="text" value="' + (p.category||'') + '" onchange="sp(&quot;reels.posts.' + i + '.category&quot;, this.value)" />';
+                    const capInput = '<input type="text" value="' + (p.caption||'') + '" onchange="sp(&quot;reels.posts.' + i + '.caption&quot;, this.value)" />';
+                    return '<div class="adm-item">'
+                        + '<div class="adm-item-header"><span>🎬 Reel ' + (i+1) + '</span><button class="adm-item-remove" onclick="removeReelItem(' + i + ')">Remover</button></div>'
+                        + field('Vídeo', '<label class="adm-file-label" style="border-color:rgba(193,53,132,0.4);"><i class="fab fa-instagram" style="color:#c13584;"></i> ' + lbl + '<input type="file" accept="video/*" onchange="handleReelVideo(event,' + i + ')" /></label><p style="font-size:0.68rem;color:var(--t2);margin-top:0.3rem;">💡 Baixe o vídeo do Reel e faça upload aqui. Máx 300MB.</p>' + vBlock)
+                        + field('Categoria', catInput)
+                        + field('Caption', capInput)
+                        + '</div>';
+                }).join('');
+                return tog('reels.visible', 'Mostrar Seção Reels')
+                    + '<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />'
+                    + field('Título', inp('reels.title'))
+                    + field('Subtítulo', inp('reels.subtitle'))
+                    + field('Username', inp('reels.username'))
+                    + '<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />'
+                    + '<h3 style="color:var(--gold);font-size:0.9rem;margin-bottom:1rem;">🎬 Reels</h3>'
+                    + reelItems
+                    + '<button class="adm-add-btn" style="border-color:rgba(193,53,132,0.5);color:#c13584;" onclick="addReelItem()">+ Adicionar Reel</button>';
             },
             formacao: () => {
                 return `${tog('formacao.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('formacao.title'))}${field('Subtítulo', inp('formacao.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Itens</h3>${D.formacao.items.map((i, idx) => `<div class="adm-item"><div class="adm-item-header"><span>${i.title}</span><button class="adm-item-remove" onclick="removeItem('formacao', ${idx})">Remover</button></div>${field('Tipo', `<select onchange="sp('formacao.items.${idx}.type', this.value)"><option value="graduation" ${i.type === 'graduation' ? 'selected' : ''}>Graduação</option><option value="cert" ${i.type === 'cert' ? 'selected' : ''}>Certificado</option><option value="course" ${i.type === 'course' ? 'selected' : ''}>Curso</option></select>`)}${field('Ícone', `<input type="text" value="${i.icon}" onchange="sp('formacao.items.${idx}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${i.title}" onchange="sp('formacao.items.${idx}.title', this.value)" />`)}${field('Instituição', `<input type="text" value="${i.institution}" onchange="sp('formacao.items.${idx}.institution', this.value)" />`)}${field('Ano', `<input type="text" value="${i.year}" onchange="sp('formacao.items.${idx}.year', this.value)" />`)}${field('Desc', `<textarea onchange="sp('formacao.items.${idx}.desc', this.value)">${i.desc}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('formacao', {type: 'course', icon: 'fa-book', title: 'Novo', institution: 'Inst', year: '2024', desc: 'Desc'})">+ Adicionar</button>`;
