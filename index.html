@@ -2628,6 +2628,14 @@
                     { name: 'SEO & Posicionamento', icon: 'fa-magnifying-glass', items: 'SEMrush,Ubersuggest,Google Trends,Keyword Planner' }
                 ]
             },
+            polaroids: {
+                items: [
+                    { image: null, caption: 'momento 1' },
+                    { image: null, caption: 'momento 2' },
+                    { image: null, caption: 'momento 3' },
+                    { image: null, caption: 'momento 4' }
+                ]
+            },
             bag: {
                 items: [
                     { emoji: '📱', skill: 'Gestão de Redes', desc: 'Estratégia e publicação em Instagram, TikTok e LinkedIn com consistência e intenção.' },
@@ -2788,6 +2796,17 @@
                     return c;
                 });
             }
+            // Limpa base64 dos polaroids (Sobre)
+            if (toSave.polaroids && toSave.polaroids.items) {
+                toSave.polaroids.items = toSave.polaroids.items.map(p => {
+                    const c = Object.assign({}, p);
+                    if (c.imagePath) {
+                        const img = c.image || '';
+                        if (img.startsWith('data:')) delete c.image;
+                    }
+                    return c;
+                });
+            }
             // Limpa base64 dos reels da seção separada também
             if (toSave.reels && toSave.reels.posts) {
                 toSave.reels.posts = toSave.reels.posts.map(p => {
@@ -2884,11 +2903,14 @@
         function buildSobre() {
             const { visible, text1, text2, highlights } = D.sobre;
             if (!visible) return '';
-            // polaroids: usa fotos do portfólio se existirem, senão placeholders
-            const portfolioPosts = (D.portfolio && D.portfolio.posts) ? D.portfolio.posts.filter(p => p.image && p.type !== 'reel').slice(0, 4) : [];
-            const polaroids = portfolioPosts.length > 0
-                ? portfolioPosts.map(p => `<div class="polaroid"><img class="polaroid-img" src="${p.image}" alt="${p.caption}" /><span class="polaroid-caption">${p.caption}</span></div>`).join('')
-                : [1,2,3,4].map(i => `<div class="polaroid"><div class="polaroid-img polaroid-placeholder"><i class="fas fa-image" style="font-size:1.5rem;color:var(--t2);"></i><span style="font-size:0.6rem;color:var(--t2);">Foto ${i}</span></div><span class="polaroid-caption">momento ${i}</span></div>`).join('');
+            // polaroids: usa D.polaroids (independente do portfólio)
+            const polItems = (D.polaroids && D.polaroids.items) ? D.polaroids.items : [];
+            const polaroids = polItems.length > 0
+                ? polItems.map((p, i) => p.image
+                    ? `<div class="polaroid"><img class="polaroid-img" src="${p.image}" alt="${p.caption || ''}" /><span class="polaroid-caption">${p.caption || ''}</span></div>`
+                    : `<div class="polaroid"><div class="polaroid-img polaroid-placeholder"><i class="fas fa-image" style="font-size:1.5rem;color:var(--t2);opacity:0.5;"></i><span style="font-size:0.6rem;color:var(--t2);">Adicione no Admin → Sobre</span></div><span class="polaroid-caption">${p.caption || 'momento ' + (i+1)}</span></div>`
+                ).join('')
+                : [1,2,3,4].map(i => `<div class="polaroid"><div class="polaroid-img polaroid-placeholder"><i class="fas fa-image" style="font-size:1.5rem;color:var(--t2);opacity:0.5;"></i><span style="font-size:0.6rem;color:var(--t2);">Admin → Sobre</span></div><span class="polaroid-caption">momento ${i}</span></div>`).join('');
             return `<section id="sobre" class="alt"><div class="container">
                 <div class="section-heading">
                     <span class="section-tag">sobre mim</span>
@@ -3309,6 +3331,7 @@
                 { id: 'identidade', label: 'Identidade', icon: 'fa-user' },
                 { id: 'hero', label: 'Hero', icon: 'fa-image' },
                 { id: 'sobre', label: 'Sobre', icon: 'fa-info-circle' },
+                { id: 'sobre_fotos', label: 'Fotos Sobre', icon: 'fa-images' },
                 { id: 'servicos', label: 'Serviços', icon: 'fa-briefcase' },
                 { id: 'processo', label: 'Processo', icon: 'fa-map' },
                 { id: 'ferramentas', label: 'Ferramentas', icon: 'fa-tools' },
@@ -3387,6 +3410,25 @@
             },
             sobre: () => {
                 return `${tog('sobre.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Parágrafo 1', txa('sobre.text1', 4))}${field('Parágrafo 2', txa('sobre.text2', 4))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Destaques</h3>${D.sobre.highlights.map((h, i) => `<div class="adm-item"><div class="adm-item-header"><span>Destaque ${i + 1}</span><button class="adm-item-remove" onclick="removeItem('sobre', ${i})">Remover</button></div>${field('Ícone', `<input type="text" value="${h.icon}" onchange="sp('sobre.highlights.${i}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${h.title}" onchange="sp('sobre.highlights.${i}.title', this.value)" />`)}${field('Texto', `<textarea onchange="sp('sobre.highlights.${i}.text', this.value)">${h.text}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('sobre', {icon: 'fa-star', title: 'Novo', text: 'Descrição'})">+ Adicionar</button>`;
+            },
+            sobre_fotos: () => {
+                if (!D.polaroids) D.polaroids = { items: [] };
+                const items = D.polaroids.items || [];
+                const itemsHtml = items.map((p, i) => {
+                    const imgBlock = p.image
+                        ? '<img src="' + p.image + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-top:0.5rem;" />'
+                        + '<button onclick="removePolaroidImage(' + i + ')" style="margin-top:0.3rem;background:rgba(183,110,121,0.2);color:var(--rose);border:none;border-radius:4px;padding:0.2rem 0.6rem;font-size:0.65rem;cursor:pointer;width:100%;">✕ Remover foto</button>'
+                        : '<div style="background:rgba(200,113,122,0.06);border:1px dashed rgba(200,113,122,0.3);border-radius:6px;padding:0.8rem;margin-top:0.4rem;font-size:0.72rem;color:var(--t2);text-align:center;">Nenhuma foto</div>';
+                    return '<div class="adm-item">'
+                        + '<div class="adm-item-header"><span>📸 Polaroid ' + (i+1) + '</span><button class="adm-item-remove" onclick="removePolaroidItem(' + i + ')">Remover</button></div>'
+                        + field('Foto', '<label class="adm-file-label"><i class="fas fa-image"></i> ' + (p.image ? 'Trocar foto' : 'Upload da foto') + '<input type="file" accept="image/*" onchange="handlePolaroidImage(event,' + i + ')" /></label>' + imgBlock)
+                        + field('Legenda', '<input type="text" value="' + (p.caption||'') + '" onchange="sp(&quot;polaroids.items.' + i + '.caption&quot;, this.value)" />')
+                        + '</div>';
+                }).join('');
+                return '<h3 style="color:var(--gold);font-size:0.9rem;margin-bottom:0.5rem;">📸 Fotos da Seção "Sobre Mim"</h3>'
+                    + '<p style="font-size:0.75rem;color:var(--t2);margin-bottom:1.5rem;">Estas fotos aparecem como polaroids na seção "Quem sou eu". São independentes do Portfólio.</p>'
+                    + itemsHtml
+                    + '<button class="adm-add-btn" onclick="addPolaroidItem()">+ Adicionar Foto</button>';
             },
             servicos: () => {
                 return `${tog('servicos.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('servicos.title'))}${field('Subtítulo', inp('servicos.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Serviços</h3>${D.servicos.items.map((s, i) => `<div class="adm-item"><div class="adm-item-header"><span>${s.title}</span><button class="adm-item-remove" onclick="removeItem('servicos', ${i})">Remover</button></div>${field('Ícone', `<input type="text" value="${s.icon}" onchange="sp('servicos.items.${i}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${s.title}" onchange="sp('servicos.items.${i}.title', this.value)" />`)}${field('Desc', `<textarea onchange="sp('servicos.items.${i}.desc', this.value)">${s.desc}</textarea>`)}${field('Tags', `<input type="text" value="${s.tags}" onchange="sp('servicos.items.${i}.tags', this.value)" />`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('servicos', {icon: 'fa-star', title: 'Novo', desc: 'Desc', tags: ''})">+ Adicionar</button>`;
@@ -3707,6 +3749,64 @@ ${colorField('Texto Secundário', 't2')}
                 }, { once: true });
             };
             reader.readAsDataURL(file);
+        }
+
+        // ── Handlers dos Polaroids (Seção Sobre) ────────────────────────────────
+        function addPolaroidItem() {
+            if (!D.polaroids) D.polaroids = { items: [] };
+            if (!D.polaroids.items) D.polaroids.items = [];
+            D.polaroids.items.push({ image: null, caption: 'momento ' + (D.polaroids.items.length + 1) });
+            showTab('sobre_fotos');
+        }
+
+        async function removePolaroidItem(index) {
+            const p = D.polaroids.items[index];
+            if (p && p.imagePath && window._fbReady) {
+                try { await window._fb.deleteImage(p.imagePath); } catch(e) {}
+            }
+            D.polaroids.items.splice(index, 1);
+            await saveData();
+            renderAll();
+            showTab('sobre_fotos');
+        }
+
+        async function removePolaroidImage(index) {
+            const p = D.polaroids.items[index];
+            if (p && p.imagePath && window._fbReady) {
+                try { await window._fb.deleteImage(p.imagePath); } catch(e) {}
+            }
+            D.polaroids.items[index].image = null;
+            D.polaroids.items[index].imagePath = null;
+            await saveData();
+            renderAll();
+            showTab('sobre_fotos');
+        }
+
+        async function handlePolaroidImage(e, index) {
+            if (!e.target.files[0]) return;
+            notify('Carregando foto...', 'success');
+            const { dataUrl, blob } = await compressImage(e.target.files[0], 800, 0.82);
+            D.polaroids.items[index].image = dataUrl;
+            showTab('sobre_fotos');
+            renderAll();
+            if (window._fbReady && window._fb) {
+                try {
+                    const oldPath = D.polaroids.items[index].imagePath;
+                    if (oldPath) await window._fb.deleteImage(oldPath);
+                    const { url, path } = await window._fb.uploadImage(blob, 'polaroids', 'pol_' + index);
+                    D.polaroids.items[index].image = url;
+                    D.polaroids.items[index].imagePath = path;
+                    await saveData();
+                    renderAll();
+                    showTab('sobre_fotos');
+                    notify('Foto salva!', 'success');
+                } catch(err) {
+                    await saveData();
+                    notify('Foto salva localmente', 'error');
+                }
+            } else {
+                await saveData();
+            }
         }
 
         // ── Handlers da seção Reels separada ────────────────────────────────────
