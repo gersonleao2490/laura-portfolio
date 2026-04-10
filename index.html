@@ -30,12 +30,9 @@
                 const DOC_ID  = 'main';
 
                 window._fb = {
-                    async saveData(D) {
-                        // _stripHeavyData é definida no escopo global — remove base64 antes de salvar
-                        const toSave = typeof _stripHeavyData === 'function'
-                            ? _stripHeavyData(D)
-                            : JSON.parse(JSON.stringify(D));
-                        await db.collection('portfolio').doc(DOC_ID).set(toSave);
+                    async saveData(cleanData) {
+                        // recebe dados já processados por _stripHeavyData no escopo global
+                        await db.collection('portfolio').doc(DOC_ID).set(cleanData);
                     },
 
                     async loadData() {
@@ -1838,50 +1835,59 @@
             // senha sempre em localStorage separado
             localStorage.setItem(SK_PWD, D.meta.password);
 
+            // processa dados ANTES de qualquer persistência
+            const cleanData = _stripHeavyData(D);
+
             // tenta salvar no Firebase
             if (window._fbReady) {
                 try {
-                    await window._fb.saveData(D);
-                    // também salva no localStorage como cache offline
-                    _saveLocalFallback();
+                    await window._fb.saveData(cleanData); // passa já limpo
+                    // cache offline no localStorage
+                    _saveLocalFallback(cleanData);
                     return;
                 } catch(e) {
                     console.warn('Firebase saveData falhou, salvando localmente:', e);
                 }
             }
-            _saveLocalFallback();
+            _saveLocalFallback(cleanData);
         }
 
         function _stripHeavyData(D) {
-            // Remove base64 pesados antes de salvar (Firestore 1MB limit)
+            // Remove TODOS os base64 antes de salvar — Firestore tem limite de 1MB por documento
             const toSave = JSON.parse(JSON.stringify(D));
             delete toSave.meta.password;
-            // foto de perfil: se tiver URL do Storage, remove base64
-            if (toSave.identity && toSave.identity.photoPath) {
-                // mantém só a URL (já está em identity.photo como URL do Storage)
-                // se identity.photo for base64 (>500 chars sem http), limpa
+
+            // foto de perfil: remove base64, mantém URL do Storage
+            if (toSave.identity) {
                 const ph = toSave.identity.photo || '';
-                if (ph.startsWith('data:')) delete toSave.identity.photo;
+                if (ph.startsWith('data:')) {
+                    // sem URL do Storage ainda — remove para não estourar Firestore
+                    delete toSave.identity.photo;
+                }
+                // base64 do vídeo de identidade (não existe, mas por precaução)
             }
+
             if (toSave.portfolio && toSave.portfolio.posts) {
                 toSave.portfolio.posts = toSave.portfolio.posts.map(p => {
                     const c = Object.assign({}, p);
-                    // vídeo base64 nunca persiste
-                    if (c.type === 'reel') delete c.video;
-                    // imagem base64: se tiver imagePath (URL no Storage), remove base64
-                    if (c.imagePath) {
-                        const img = c.image || '';
-                        if (img.startsWith('data:')) delete c.image;
-                    }
+                    // vídeo base64 NUNCA persiste — sempre usa videoURL do Storage
+                    delete c.video;
+                    // imagem base64: remove sempre — usa image URL do Storage
+                    const img = c.image || '';
+                    if (img.startsWith('data:')) delete c.image;
+                    // thumb base64 do reel: comprimida mas ainda pode ser grande
+                    const th = c.thumb || '';
+                    if (th.startsWith('data:') && th.length > 50000) delete c.thumb;
                     return c;
                 });
             }
             return toSave;
         }
 
-        function _saveLocalFallback() {
+        function _saveLocalFallback(cleanData) {
             try {
-                const toSave = _stripHeavyData(D);
+                // usa dados já processados se disponíveis, senão processa agora
+                const toSave = cleanData || _stripHeavyData(D);
                 localStorage.setItem(SK, JSON.stringify(toSave));
             } catch(e) {
                 if (e.name === 'QuotaExceededError') console.warn('localStorage cheio');
