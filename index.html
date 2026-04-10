@@ -86,21 +86,22 @@
     </script>
     <style>
         :root {
-            --bg0: #FAF7F2;
-            --bg1: #F2EBE0;
+            --bg0: #FDF8F5;
+            --bg1: #F5EBE8;
             --bgc: #FFFFFF;
-            --gold: #C9956C;
-            --gold-l: #DDB896;
-            --gold-d: #A8724A;
-            --rose: #C4717A;
-            --rose-l: #D9969D;
-            --sage: #8A9E8A;
-            --cream: #F7F0E6;
-            --t1: #2C1F14;
-            --t2: #7A6555;
-            --border: rgba(201, 149, 108, 0.18);
-            --border-gold: rgba(201, 149, 108, 0.22);
-            --grad: linear-gradient(135deg, #C9956C, #DDB896, #A8724A);
+            --gold: #C8717A;
+            --gold-l: #E0959C;
+            --gold-d: #A84E57;
+            --rose: #D4849A;
+            --rose-l: #E8B4C2;
+            --accent: #9B4F6B;
+            --cream: #FDF0EC;
+            --nude: #E8D5CC;
+            --t1: #2A1520;
+            --t2: #7A5560;
+            --border: rgba(200, 113, 122, 0.15);
+            --border-gold: rgba(200, 113, 122, 0.22);
+            --grad: linear-gradient(135deg, #C8717A, #D4849A, #9B4F6B);
         }
 
         * {
@@ -133,9 +134,9 @@
             font-weight: 600;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: var(--rose);
-            background: rgba(196, 113, 122, 0.1);
-            border: 1px solid rgba(196, 113, 122, 0.2);
+            color: var(--accent);
+            background: rgba(155, 79, 107, 0.08);
+            border: 1px solid rgba(155, 79, 107, 0.2);
             border-radius: 50px;
             padding: 0.3rem 1rem;
             margin-bottom: 1rem;
@@ -167,7 +168,7 @@
             left: 0;
             right: 0;
             height: 70px;
-            background: rgba(250, 247, 242, 0.96);
+            background: rgba(253, 248, 245, 0.96);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -181,7 +182,7 @@
             font-family: 'Playfair Display', serif;
             font-size: 1.3rem;
             font-weight: 700;
-            color: var(--gold);
+            color: var(--accent);
             letter-spacing: -0.02em;
         }
 
@@ -202,23 +203,25 @@
         }
 
         .nav-links a:hover {
-            color: var(--gold);
+            color: var(--accent);
         }
 
         .nav-cta {
             padding: 0.6rem 1.3rem;
-            background: var(--gold);
-            color: var(--bg0);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            color: #fff;
             border-radius: 50px;
             font-weight: 600;
             font-size: 0.75rem;
             letter-spacing: 0.05em;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 12px rgba(200,113,122,0.3);
         }
 
         .nav-cta:hover {
-            background: var(--gold-l);
-            color: var(--bg0);
+            background: linear-gradient(135deg, #D4849A, #C8717A);
+            color: #fff;
+            transform: translateY(-1px);
         }
 
         .nav-toggle {
@@ -252,7 +255,7 @@
         .section-heading h2 {
             font-size: clamp(1.8rem, 5vw, 2.8rem);
             margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #F0EAD6 40%, #C9A84C 100%);
+            background: linear-gradient(135deg, #2A1520 40%, #C8717A 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -268,6 +271,7 @@
         #hero {
             padding-top: 0;
             padding-bottom: 0;
+            background: linear-gradient(160deg, #FDF8F5 0%, #F5EBE8 60%, #FDF0EC 100%);
         }
 
         .hero-inner {
@@ -287,16 +291,17 @@
 
         .hero-pill {
             display: inline-block;
-            padding: 0.5rem 1rem;
-            background: rgba(201, 168, 76, 0.1);
-            border: 1px solid var(--border-gold);
+            padding: 0.5rem 1.2rem;
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            border: none;
             border-radius: 50px;
             font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: var(--gold);
+            color: #fff;
             margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(200,113,122,0.3);
         }
 
         .hero-name {
@@ -307,7 +312,10 @@
         }
 
         .hero-name span {
-            color: var(--gold);
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-subtitle {
@@ -346,25 +354,27 @@
         }
 
         .cta-primary {
-            background: var(--gold);
-            color: var(--bg0);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(200,113,122,0.35);
         }
 
         .cta-primary:hover {
-            background: var(--gold-l);
+            background: linear-gradient(135deg, #D4849A, #C8717A);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200,113,122,0.45);
         }
 
         .cta-secondary {
             background: transparent;
-            color: var(--gold);
-            border: 1px solid var(--gold);
+            color: var(--accent);
+            border: 2px solid var(--gold);
         }
 
         .cta-secondary:hover {
-            background: rgba(201, 168, 76, 0.1);
-            border-color: var(--gold-l);
-            color: var(--gold-l);
+            background: rgba(200, 113, 122, 0.08);
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .hero-badges {
@@ -376,8 +386,8 @@
 
         .badge {
             padding: 0.6rem 1rem;
-            background: rgba(201, 168, 76, 0.08);
-            border: 1px solid var(--border-gold);
+            background: rgba(200, 113, 122, 0.07);
+            border: 1px solid rgba(200,113,122,0.2);
             border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 500;
@@ -456,7 +466,7 @@
         }
 
         .highlight-card {
-            background: rgba(201, 168, 76, 0.05);
+            background: rgba(200, 113, 122, 0.04);
             border: 1px solid var(--border-gold);
             border-radius: 10px;
             padding: 1.5rem;
@@ -495,7 +505,7 @@
         }
 
         .service-card {
-            background: rgba(201, 168, 76, 0.03);
+            background: rgba(200, 113, 122, 0.03);
             border: 1px solid var(--border-gold);
             border-radius: 10px;
             padding: 2rem;
@@ -549,10 +559,10 @@
 
         .tag {
             padding: 0.35rem 0.7rem;
-            background: rgba(201, 168, 76, 0.15);
+            background: rgba(200, 113, 122, 0.12);
             border-radius: 50px;
             font-size: 0.65rem;
-            color: var(--gold);
+            color: var(--accent);
             font-weight: 500;
         }
 
@@ -670,10 +680,10 @@
 
         .tool-pill {
             padding: 0.4rem 0.8rem;
-            background: rgba(201, 168, 76, 0.15);
+            background: rgba(200, 113, 122, 0.1);
             border-radius: 50px;
             font-size: 0.75rem;
-            color: var(--gold);
+            color: var(--accent);
             font-weight: 500;
             transition: all 0.3s ease;
         }
@@ -789,7 +799,7 @@
             width: 16px;
             height: 16px;
             background: var(--bg0);
-            border: 3px solid var(--gold);
+            border: 3px solid var(--rose);
             border-radius: 50%;
         }
 
@@ -856,7 +866,7 @@
         .metric-value {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--gold);
+            color: var(--accent);
             margin-bottom: 0.5rem;
             font-family: 'Playfair Display', serif;
         }
@@ -1134,23 +1144,24 @@
             bottom: 1.5rem;
             right: 1.5rem;
             z-index: 8888;
-            background: rgba(7, 7, 7, 0.9);
-            border: 1px solid rgba(201, 168, 76, 0.3);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            border: none;
             border-radius: 50%;
             width: 48px;
             height: 48px;
-            color: var(--gold);
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(200,113,122,0.4);
         }
 
         #adm-fab:hover {
-            border-color: var(--gold);
             transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(200,113,122,0.5);
         }
 
         #adm-login {
@@ -1205,8 +1216,8 @@
         .login-btn {
             width: 100%;
             padding: 0.8rem;
-            background: var(--gold);
-            color: var(--bg0);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            color: #fff;
             border: none;
             border-radius: 6px;
             font-weight: 700;
@@ -1286,12 +1297,12 @@
         }
 
         .adm-btn-save {
-            background: var(--gold);
-            color: var(--bg0);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            color: #fff;
         }
 
         .adm-btn-save:hover {
-            background: var(--gold-l);
+            background: linear-gradient(135deg, #D4849A, #C8717A);
         }
 
         .adm-btn-secondary {
@@ -1426,7 +1437,7 @@
         }
 
         .toggle-switch.active {
-            background: var(--gold);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
         }
 
         .toggle-knob {
@@ -1534,8 +1545,8 @@
             bottom: 2rem;
             left: 2rem;
             padding: 1rem 1.5rem;
-            background: var(--gold);
-            color: var(--bg0);
+            background: linear-gradient(135deg, #C8717A, #9B4F6B);
+            color: #fff;
             border-radius: 8px;
             font-weight: 600;
             font-size: 0.85rem;
@@ -1806,7 +1817,7 @@
         }
 
         .phone-screen {
-            background: var(--bg0);
+            background: #FDF8F5;
             border-radius: 37px;
             overflow: hidden;
             min-height: 580px;
@@ -1816,7 +1827,7 @@
 
         .phone-status {
             height: 50px;
-            background: var(--bg0);
+            background: #FDF8F5;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -1962,19 +1973,25 @@
             font-size: 0.72rem;
             font-weight: 600;
             color: var(--t1);
-            box-shadow: 0 4px 16px rgba(44,32,20,0.12);
+            box-shadow: 0 4px 20px rgba(200,113,122,0.2);
             white-space: nowrap;
             animation: floatBadge 3s ease-in-out infinite;
+            border: 1px solid rgba(200,113,122,0.15);
+            z-index: 5;
         }
 
         .hero-floating-badge.badge-1 {
-            top: 15%; right: -10%;
+            top: 10%; right: -8%;
             animation-delay: 0s;
         }
 
         .hero-floating-badge.badge-2 {
-            bottom: 20%; right: -5%;
+            bottom: 15%; right: -6%;
             animation-delay: 1.5s;
+        }
+
+        @media (max-width: 900px) {
+            .hero-floating-badge { display: none; }
         }
 
         @keyframes floatBadge {
@@ -2055,7 +2072,7 @@
 
         .reels-heading h2 {
             font-size: clamp(1.8rem, 5vw, 2.8rem);
-            background: linear-gradient(135deg, #F0EAD6 40%, #C9A84C 100%);
+            background: linear-gradient(135deg, #2A1520 40%, #C8717A 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -2381,7 +2398,7 @@
                 left: 0;
                 right: 0;
                 flex-direction: column;
-                background: rgba(250, 247, 242, 0.98);
+                background: rgba(253, 248, 245, 0.98);
                 border-bottom: 1px solid var(--border);
                 padding: 1rem;
                 gap: 1rem;
@@ -2422,7 +2439,84 @@
                 padding: 1rem 1.5rem;
             }
         }
-    </style>
+    
+        /* ══ FORÇAR TEMA CLARO EM TODAS AS SEÇÕES DO SITE ══ */
+        /* Garante que mesmo com cores salvas antigas, o site fica claro */
+        body, section, #root, #root > * {
+            --force-light: 1;
+        }
+
+        section:not(#adm-panel) {
+            background-color: var(--bg0);
+        }
+
+        section.alt {
+            background-color: var(--bg1) !important;
+        }
+
+        #hero {
+            background: linear-gradient(160deg, #FDF8F5 0%, #F5EBE8 60%, #FDF0EC 100%) !important;
+        }
+
+        #sobre { background-color: var(--bg1) !important; }
+        #servicos { background-color: var(--bg0) !important; }
+        #processo { background-color: var(--bg1) !important; }
+        #ferramentas { background-color: var(--bg0) !important; }
+        #portfolio { background-color: var(--bg1) !important; }
+        #reels-section { background-color: var(--bg0) !important; }
+        #bag-section { background-color: #FDF0EC !important; }
+        #formacao { background-color: var(--bg0) !important; }
+        #metricas { background-color: var(--bg1) !important; }
+        #parcerias { background-color: var(--bg0) !important; }
+        #depoimentos { background-color: var(--bg1) !important; }
+        #contato { background-color: var(--bg0) !important; }
+        #contato-phone { background-color: var(--bg1) !important; }
+
+        /* Textos sempre escuros e legíveis */
+        section:not(#adm-panel) h1,
+        section:not(#adm-panel) h2,
+        section:not(#adm-panel) h3,
+        section:not(#adm-panel) h4 {
+            color: var(--t1);
+        }
+
+        section:not(#adm-panel) p,
+        section:not(#adm-panel) .about-text,
+        section:not(#adm-panel) .step-desc,
+        section:not(#adm-panel) .service-desc,
+        section:not(#adm-panel) .bag-desc {
+            color: var(--t2);
+        }
+
+        /* Service cards fundo branco explícito */
+        .service-card, .step, .tool-category, .highlight-card, .bag-item {
+            background: #fff !important;
+            border-color: rgba(200,113,122,0.18) !important;
+        }
+
+        /* Textos dos cards legíveis */
+        .service-title, .step-title, .tool-name, .highlight-title, .bag-skill {
+            color: var(--t1) !important;
+        }
+
+        .service-desc, .step-desc, .tool-items, .highlight-text, .bag-desc {
+            color: var(--t2) !important;
+        }
+
+        .service-icon, .step-icon, .tool-icon, .highlight-icon, .metric-icon {
+            color: var(--gold) !important;
+        }
+
+        .step-number {
+            color: var(--accent) !important;
+        }
+
+        /* Section heading legível */
+        .section-heading p {
+            color: var(--t2) !important;
+        }
+
+</style>
 </head>
 <body>
     <div id="root"></div>
@@ -2461,10 +2555,10 @@
                 password: '48d0a846a946bfc7be0cb7729f23fbf983d62e55c5419eafe51b87bca163f25c'
             },
             colors: {
-                bg0: '#FAF7F2', bg1: '#F2EBE0', bgc: '#FFFFFF',
-                gold: '#C9956C', gold_l: '#DDB896', gold_d: '#A8724A',
-                rose: '#C4717A', rose_l: '#D9969D',
-                t1: '#2C1F14', t2: '#7A6555'
+                bg0: '#FDF8F5', bg1: '#F5EBE8', bgc: '#FFFFFF',
+                gold: '#C8717A', gold_l: '#E0959C', gold_d: '#A84E57',
+                rose: '#D4849A', rose_l: '#E8B4C2',
+                t1: '#2A1520', t2: '#7A5560'
             },
             identity: {
                 name1: 'Laura Vieira', name2: 'Arruda', title: 'Social Media',
@@ -2603,6 +2697,19 @@
         const SK_PWD = 'lva_pwd_v3'; // chave separada — senha nunca vai pro JSON exportável
 
         // ── loadData: Firebase primeiro, localStorage como fallback ──────────────
+        // Cores escuras antigas (tema dark anterior) — migrar para tema claro
+        const DARK_BG_DETECT = ['#07', '#10', '#16', '#0a', '#0b', '#0c', '#0d', '#0e', '#0f'];
+        function migrateColors(d) {
+            if (!d.colors) return;
+            const bg = (d.colors.bg0 || '').toLowerCase();
+            const isDark = DARK_BG_DETECT.some(p => bg.startsWith(p));
+            if (isDark) {
+                // usuário tinha tema escuro antigo — aplicar novo tema rosa
+                d.colors = JSON.parse(JSON.stringify(DEFAULTS.colors));
+                console.log('Migração: tema escuro → tema rosa feminino');
+            }
+        }
+
         async function loadData() {
             // senha sempre do localStorage (nunca no Firebase)
             const storedPwd = localStorage.getItem(SK_PWD);
@@ -2612,10 +2719,10 @@
                     const remote = await window._fb.loadData();
                     if (remote) {
                         D = remote;
-                        // preenche chaves ausentes com defaults
                         Object.keys(DEFAULTS).forEach(k => {
                             if (!(k in D)) D[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
                         });
+                        migrateColors(D);
                         D.meta.password = storedPwd || DEFAULTS.meta.password;
                         return;
                     }
@@ -2629,6 +2736,7 @@
             Object.keys(DEFAULTS).forEach(k => {
                 if (!(k in D)) D[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
             });
+            migrateColors(D);
             D.meta.password = storedPwd || DEFAULTS.meta.password;
         }
 
@@ -3380,7 +3488,7 @@ ${colorField('Rose Claro', 'rose_l')}
 ${colorField('Texto Principal', 't1')}
 ${colorField('Texto Secundário', 't2')}
 <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0;" />
-<button class="adm-btn adm-btn-secondary" style="width:100%;margin-bottom:0.8rem;" onclick="D.colors={bg0:'#070707',bg1:'#101010',bgc:'#161616',gold:'#C9A84C',gold_l:'#E2C97E',gold_d:'#9A7A2A',rose:'#B76E79',rose_l:'#D49098',t1:'#F0EAD6',t2:'#95897a'}; applyColors(); showTab('cores'); notify('Cores resetadas', 'success');">↺ Resetar Cores Padrão</button>`;
+<button class="adm-btn adm-btn-secondary" style="width:100%;margin-bottom:0.8rem;" onclick="D.colors={bg0:'#FDF8F5',bg1:'#F5EBE8',bgc:'#FFFFFF',gold:'#C8717A',gold_l:'#E0959C',gold_d:'#A84E57',rose:'#D4849A',rose_l:'#E8B4C2',t1:'#2A1520',t2:'#7A5560'}; applyColors(); showTab('cores'); notify('Cores resetadas', 'success');">↺ Resetar Cores Padrão</button>`;
             },
             config: () => {
                 return `<h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Configurações</h3>${field('Título da Página', inp('meta.title'))}${field('Nova Senha', `<input type="password" placeholder="Deixar em branco para não alterar" onchange="if(this.value) updatePassword(this.value)" />`)}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Resetar TODOS os dados?')) { D = JSON.parse(JSON.stringify(DEFAULTS)); localStorage.removeItem(SK_PWD); localStorage.removeItem(SK); applyColors(); saveData().then(() => { renderAll(); closeAdmin(); notify('Resetado', 'success'); }); }">Resetar Tudo</button><button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Deletar TODOS os dados?')) { localStorage.removeItem(SK); localStorage.removeItem(SK_PWD); location.reload(); }">Limpar Dados</button>`;
@@ -3389,6 +3497,12 @@ ${colorField('Texto Secundário', 't2')}
 
         function applyColors() {
             const c = D.colors || {};
+            // Migrar cores escuras salvas para claro
+            const bg = (c.bg0 || '').toLowerCase();
+            if (DARK_BG_DETECT && DARK_BG_DETECT.some(p => bg.startsWith(p))) {
+                D.colors = JSON.parse(JSON.stringify(DEFAULTS.colors));
+                return applyColors(); // re-chamar com cores corretas
+            }
             const root = document.documentElement;
             if (c.bg0)    root.style.setProperty('--bg0', c.bg0);
             if (c.bg1)    root.style.setProperty('--bg1', c.bg1);
