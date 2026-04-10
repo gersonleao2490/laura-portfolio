@@ -1530,27 +1530,37 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
+            opacity: 1; /* visível por padrão — some quando tocando */
             transition: opacity 0.3s ease;
             pointer-events: none;
+            background: rgba(0,0,0,0.15);
         }
 
-        .reel-item:hover .reel-play-hint {
-            opacity: 1;
+        .reel-item.playing .reel-play-hint {
+            opacity: 0;
+        }
+
+        .reel-item {
+            cursor: pointer;
         }
 
         .reel-play-icon {
-            width: 52px;
-            height: 52px;
-            background: rgba(0,0,0,0.55);
+            width: 56px;
+            height: 56px;
+            background: rgba(0,0,0,0.6);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             backdrop-filter: blur(4px);
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .reel-item:active .reel-play-icon {
+            transform: scale(0.92);
         }
 
         .reel-badge {
@@ -1985,9 +1995,9 @@
                     const videoSrc = p.videoURL || p.video || null;
                     if (videoSrc) {
                         const thumb = p.thumb ? `poster="${p.thumb}"` : '';
-                        return `<div class="portfolio-item fade-in reel-item" onmouseenter="this.querySelector('video').play()" onmouseleave="this.querySelector('video').pause()">
+                        return `<div class="portfolio-item fade-in reel-item" onclick="toggleReelVideo(this)">
                             <div class="portfolio-bg" style="background:#111;position:relative;">
-                                <video src="${videoSrc}" ${thumb} muted loop playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;"></video>
+                                <video src="${videoSrc}" ${thumb} muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;"></video>
                                 <div class="reel-play-hint"><div class="reel-play-icon"><i class="fas fa-play"></i></div></div>
                                 <div class="reel-badge"><i class="fab fa-instagram"></i> Reel</div>
                             </div>
@@ -2316,6 +2326,32 @@ ${colorField('Texto Secundário', 't2')}
         function hexToRgb(hex) {
             const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return r ? `${parseInt(r[1],16)}, ${parseInt(r[2],16)}, ${parseInt(r[3],16)}` : '201, 168, 76';
+        }
+
+        function toggleReelVideo(item) {
+            const video = item.querySelector('video');
+            const hint  = item.querySelector('.reel-play-hint');
+            if (!video) return;
+            if (video.paused) {
+                // pausa todos os outros reels antes de tocar este
+                document.querySelectorAll('.reel-item video').forEach(v => {
+                    if (v !== video) {
+                        v.pause();
+                        const h = v.closest('.reel-item').querySelector('.reel-play-hint');
+                        if (h) { h.style.opacity = '1'; h.querySelector('.reel-play-icon i').className = 'fas fa-play'; }
+                    }
+                });
+                video.play().then(() => {
+                    if (hint) { hint.style.opacity = '0'; }
+                }).catch(() => {
+                    // fallback: abre em nova aba se autoplay bloqueado
+                });
+                item.classList.add('playing');
+            } else {
+                video.pause();
+                if (hint) { hint.style.opacity = '1'; }
+                item.classList.remove('playing');
+            }
         }
 
         async function saveAndApply() {
