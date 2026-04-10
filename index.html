@@ -6,7 +6,7 @@
     <title>Laura Vieira Arruda — Social Media</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Firebase Compat SDKs — funcionam em file://, http:// e https:// -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -86,19 +86,21 @@
     </script>
     <style>
         :root {
-            --bg0: #070707;
-            --bg1: #101010;
-            --bgc: #161616;
-            --gold: #C9A84C;
-            --gold-l: #E2C97E;
-            --gold-d: #9A7A2A;
-            --rose: #B76E79;
-            --rose-l: #D49098;
-            --t1: #F0EAD6;
-            --t2: #95897a;
-            --border: rgba(201, 168, 76, 0.18);
-            --border-gold: rgba(201, 168, 76, 0.2);
-            --grad: linear-gradient(135deg, #C9A84C, #E2C97E, #9A7A2A);
+            --bg0: #FAF7F2;
+            --bg1: #F2EBE0;
+            --bgc: #FFFFFF;
+            --gold: #C9956C;
+            --gold-l: #DDB896;
+            --gold-d: #A8724A;
+            --rose: #C4717A;
+            --rose-l: #D9969D;
+            --sage: #8A9E8A;
+            --cream: #F7F0E6;
+            --t1: #2C1F14;
+            --t2: #7A6555;
+            --border: rgba(201, 149, 108, 0.18);
+            --border-gold: rgba(201, 149, 108, 0.22);
+            --grad: linear-gradient(135deg, #C9956C, #DDB896, #A8724A);
         }
 
         * {
@@ -117,6 +119,26 @@
             color: var(--t1);
             line-height: 1.6;
             overflow-x: hidden;
+        }
+
+        .editorial {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--rose);
+            background: rgba(196, 113, 122, 0.1);
+            border: 1px solid rgba(196, 113, 122, 0.2);
+            border-radius: 50px;
+            padding: 0.3rem 1rem;
+            margin-bottom: 1rem;
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -145,8 +167,8 @@
             left: 0;
             right: 0;
             height: 70px;
-            background: rgba(7, 7, 7, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(250, 247, 242, 0.96);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
@@ -1035,13 +1057,17 @@
         }
 
         footer {
-            background: var(--bg1);
+            background: var(--t1);
             border-top: 1px solid var(--border);
             padding: 2rem;
             text-align: center;
-            color: var(--t2);
+            color: var(--bg0);
             font-size: 0.85rem;
         }
+
+        footer .footer-logo { color: var(--gold-l); }
+        footer .niche-tag { background: rgba(250,247,242,0.12); color: var(--gold-l); }
+        footer p { color: rgba(250,247,242,0.6); }
 
         .footer-content {
             max-width: 1200px;
@@ -1199,7 +1225,22 @@
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            background: var(--bg0);
+            background: #101010; /* admin sempre escuro */
+        }
+
+        /* Admin sempre usa cores escuras independente do tema do site */
+        #adm-panel, #adm-panel * {
+            --bg0-adm: #070707;
+            --bgc-adm: #161616;
+        }
+
+        #adm-sidebar { background: #0a0a0a !important; }
+        #adm-topbar  { background: #161616 !important; }
+        #adm-content { background: #101010; }
+        #adm-content input, #adm-content textarea, #adm-content select {
+            background: #161616 !important;
+            color: #F0EAD6 !important;
+            border-color: rgba(201,149,108,0.25) !important;
         }
 
         #adm-panel.show {
@@ -1593,6 +1634,398 @@
         }
 
 
+
+        /* ══ POLAROID GRID ══ */
+        .polaroid-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.8rem;
+            margin-top: 2.5rem;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 0.75rem 0.75rem 2.5rem;
+            box-shadow: 0 4px 20px rgba(44,32,20,0.15), 0 1px 4px rgba(44,32,20,0.1);
+            transform: rotate(var(--rot, -2deg));
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+            cursor: default;
+            position: relative;
+        }
+
+        .polaroid:nth-child(2n) { --rot: 1.5deg; }
+        .polaroid:nth-child(3n) { --rot: -3deg; }
+        .polaroid:nth-child(4n) { --rot: 2.5deg; }
+
+        .polaroid:hover {
+            transform: rotate(0deg) scale(1.07);
+            box-shadow: 0 12px 40px rgba(44,32,20,0.22);
+            z-index: 10;
+        }
+
+        .polaroid-img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+            background: var(--bg1);
+        }
+
+        .polaroid-placeholder {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, var(--bg1), var(--cream));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.4rem;
+            color: var(--t2);
+            font-size: 0.65rem;
+        }
+
+        .polaroid-caption {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 0.8rem;
+            color: var(--t2);
+        }
+
+        /* ══ WHAT'S IN MY BAG ══ */
+        #bag-section {
+            padding: 5rem 2rem;
+            background: var(--cream);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #bag-section::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(196,113,122,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .bag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .bag-item {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bag-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--grad);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .bag-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(44,32,20,0.12);
+        }
+
+        .bag-item:hover::before { opacity: 1; }
+
+        .bag-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .bag-skill {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--t1);
+            margin-bottom: 0.4rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .bag-desc {
+            font-size: 0.78rem;
+            color: var(--t2);
+            line-height: 1.6;
+        }
+
+        /* ══ CONTACT SMARTPHONE ══ */
+        #contato-phone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5rem 2rem;
+            background: var(--bg1);
+            min-height: 80vh;
+        }
+
+        .phone-wrap {
+            position: relative;
+        }
+
+        .phone-device {
+            width: 320px;
+            background: linear-gradient(160deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-radius: 50px;
+            padding: 16px;
+            box-shadow:
+                0 0 0 2px #3a3a3a,
+                0 0 0 4px #222,
+                0 40px 80px rgba(44,32,20,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            position: relative;
+        }
+
+        .phone-island {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px; height: 26px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            background: var(--bg0);
+            border-radius: 37px;
+            overflow: hidden;
+            min-height: 580px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .phone-status {
+            height: 50px;
+            background: var(--bg0);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 0.5rem;
+        }
+
+        .phone-time {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--t2);
+        }
+
+        .phone-content {
+            flex: 1;
+            padding: 1.5rem 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .phone-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gold);
+            margin-bottom: 0.8rem;
+            background: var(--bg1);
+        }
+
+        .phone-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--t1);
+            margin-bottom: 0.2rem;
+        }
+
+        .phone-role {
+            font-size: 0.72rem;
+            color: var(--rose);
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .phone-divider {
+            width: 40px;
+            height: 2px;
+            background: var(--grad);
+            border-radius: 2px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .phone-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            width: 100%;
+        }
+
+        .phone-link {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            background: var(--bg1);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--t1);
+            font-size: 0.78rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            border: 1px solid var(--border);
+        }
+
+        .phone-link:hover {
+            background: var(--gold);
+            color: #fff;
+            border-color: var(--gold);
+            transform: scale(1.02);
+        }
+
+        .phone-link i {
+            width: 16px;
+            font-size: 1rem;
+        }
+
+        .phone-social {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.2rem;
+            justify-content: center;
+        }
+
+        .phone-social-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            color: #fff;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .phone-social-btn:hover { transform: scale(1.15); color: #fff; }
+        .phone-social-btn.ig { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .phone-social-btn.tt { background: #000; }
+        .phone-social-btn.li { background: #0077b5; }
+        .phone-social-btn.yt { background: #ff0000; }
+        .phone-social-btn.wa { background: #25d366; }
+
+        .phone-home-bar {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-home-bar::after {
+            content: '';
+            width: 100px; height: 4px;
+            background: var(--t2);
+            border-radius: 2px;
+            opacity: 0.3;
+        }
+
+        /* ══ HERO STORYTELLING ══ */
+        .hero-editorial-tag {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--rose);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .hero-floating-badge {
+            position: absolute;
+            padding: 0.6rem 1.2rem;
+            background: #fff;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--t1);
+            box-shadow: 0 4px 16px rgba(44,32,20,0.12);
+            white-space: nowrap;
+            animation: floatBadge 3s ease-in-out infinite;
+        }
+
+        .hero-floating-badge.badge-1 {
+            top: 15%; right: -10%;
+            animation-delay: 0s;
+        }
+
+        .hero-floating-badge.badge-2 {
+            bottom: 20%; right: -5%;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ══ ICON NAV (mobile-style) ══ */
+        .icon-nav-strip {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 2rem 0 0;
+        }
+
+        .icon-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.8rem 1rem;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            color: var(--t1);
+            min-width: 70px;
+        }
+
+        .icon-nav-item:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(201,149,108,0.3);
+        }
+
+        .icon-nav-item i {
+            font-size: 1.3rem;
+        }
+
+        .icon-nav-item span {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
         /* ══════════════════════════════════════════════════════
            SEÇÃO REELS — Mockup iPhone Carrossel 3D
         ══════════════════════════════════════════════════════ */
@@ -1948,7 +2381,7 @@
                 left: 0;
                 right: 0;
                 flex-direction: column;
-                background: rgba(7, 7, 7, 0.98);
+                background: rgba(250, 247, 242, 0.98);
                 border-bottom: 1px solid var(--border);
                 padding: 1rem;
                 gap: 1rem;
@@ -2028,10 +2461,10 @@
                 password: '48d0a846a946bfc7be0cb7729f23fbf983d62e55c5419eafe51b87bca163f25c'
             },
             colors: {
-                bg0: '#070707', bg1: '#101010', bgc: '#161616',
-                gold: '#C9A84C', gold_l: '#E2C97E', gold_d: '#9A7A2A',
-                rose: '#B76E79', rose_l: '#D49098',
-                t1: '#F0EAD6', t2: '#95897a'
+                bg0: '#FAF7F2', bg1: '#F2EBE0', bgc: '#FFFFFF',
+                gold: '#C9956C', gold_l: '#DDB896', gold_d: '#A8724A',
+                rose: '#C4717A', rose_l: '#D9969D',
+                t1: '#2C1F14', t2: '#7A6555'
             },
             identity: {
                 name1: 'Laura Vieira', name2: 'Arruda', title: 'Social Media',
@@ -2099,6 +2532,16 @@
                     { name: 'Gestão & Agendamento', icon: 'fa-calendar-check', items: 'Meta Business Suite,Later,Buffer,Notion' },
                     { name: 'Análise & Dados', icon: 'fa-chart-bar', items: 'Meta Insights,Google Analytics,TikTok Analytics,Planilhas Google' },
                     { name: 'SEO & Posicionamento', icon: 'fa-magnifying-glass', items: 'SEMrush,Ubersuggest,Google Trends,Keyword Planner' }
+                ]
+            },
+            bag: {
+                items: [
+                    { emoji: '📱', skill: 'Gestão de Redes', desc: 'Estratégia e publicação em Instagram, TikTok e LinkedIn com consistência e intenção.' },
+                    { emoji: '✍️', skill: 'Copywriting', desc: 'Legendas que convertem, CTAs irresistíveis e storytelling alinhado à voz da marca.' },
+                    { emoji: '🎨', skill: 'Design Visual', desc: 'Artes no Canva Pro e Adobe Express com identidade visual coesa e impacto estético.' },
+                    { emoji: '📊', skill: 'Analytics', desc: 'Leitura de métricas, relatórios de desempenho e ajustes estratégicos orientados por dados.' },
+                    { emoji: '🔍', skill: 'SEO & Bio', desc: 'Otimização de perfil, palavras-chave estratégicas e posicionamento orgânico.' },
+                    { emoji: '🤝', skill: 'Relacionamento', desc: 'Gestão de comunidade, UGC e parcerias com marcas e influenciadores.' }
                 ]
             },
             reels: {
@@ -2292,15 +2735,24 @@
             const { pill, show_badges, b1_icon, b1_label, b1_value, b2_icon, b2_label, b2_value, cta1_text, cta1_link, cta2_text, cta2_link } = D.hero;
             const photoHtml = photo
                 ? `<img src="${photo}" alt="${name1}" />`
-                : `<div class="image-placeholder"><i class="fas fa-camera"></i><p>Adicione sua foto aqui</p><p style="font-size:0.7rem;margin-top:0.4rem;opacity:0.5;">Use o painel Admin → Identidade</p></div>`;
+                : `<div class="image-placeholder"><i class="fas fa-camera"></i><p>Adicione sua foto aqui</p><p style="font-size:0.7rem;margin-top:0.4rem;opacity:0.5;">Admin → Identidade</p></div>`;
             const badges = show_badges ? `<div class="hero-badges">
                 <div class="badge"><span class="badge-icon">${b1_icon}</span><span>${b1_label}: <strong>${b1_value}</strong></span></div>
                 <div class="badge"><span class="badge-icon">${b2_icon}</span><span>${b2_label}: <strong>${b2_value}</strong></span></div>
             </div>` : '';
+            const iconNav = `<div class="icon-nav-strip">
+                <a href="#sobre" class="icon-nav-item"><i class="fas fa-user"></i><span>Sobre</span></a>
+                <a href="#servicos" class="icon-nav-item"><i class="fas fa-star"></i><span>Serviços</span></a>
+                <a href="#portfolio" class="icon-nav-item"><i class="fas fa-images"></i><span>Portfolio</span></a>
+                <a href="#reels-section" class="icon-nav-item"><i class="fab fa-instagram"></i><span>Reels</span></a>
+                <a href="#bag-section" class="icon-nav-item"><i class="fas fa-briefcase"></i><span>Skills</span></a>
+                <a href="#contato" class="icon-nav-item"><i class="fas fa-envelope"></i><span>Contato</span></a>
+            </div>`;
             return `
 <section id="hero">
   <div class="hero-inner">
     <div class="hero-content">
+      <span class="hero-editorial-tag">Social Media & Estratégia Digital</span>
       <div class="hero-pill">${pill}</div>
       <h1 class="hero-name"><span>${name1}</span><br>${name2}</h1>
       <p class="hero-subtitle">${subtitle}</p>
@@ -2310,9 +2762,12 @@
         <a href="${cta2_link}" class="cta-btn cta-secondary">${cta2_text}</a>
       </div>
       ${badges}
+      ${iconNav}
     </div>
-    <div class="hero-image">
+    <div class="hero-image" style="position:relative;">
       <div class="image-frame" id="photo-upload-frame">${photoHtml}</div>
+      <div class="hero-floating-badge badge-1">✨ Disponível para projetos</div>
+      <div class="hero-floating-badge badge-2">📊 Resultados mensuráveis</div>
     </div>
   </div>
 </section>`;
@@ -2321,7 +2776,23 @@
         function buildSobre() {
             const { visible, text1, text2, highlights } = D.sobre;
             if (!visible) return '';
-            return `<section id="sobre" class="alt"><div class="container"><div class="section-heading"><h2>Sobre Mim</h2></div><div class="about-grid"><div class="about-text">${text1}</div><div class="about-text">${text2}</div></div><div class="highlights">${highlights.map(h => `<div class="highlight-card fade-in"><div class="highlight-icon"><i class="fas ${h.icon}"></i></div><h3 class="highlight-title">${h.title}</h3><p class="highlight-text">${h.text}</p></div>`).join('')}</div></div></section>`;
+            // polaroids: usa fotos do portfólio se existirem, senão placeholders
+            const portfolioPosts = (D.portfolio && D.portfolio.posts) ? D.portfolio.posts.filter(p => p.image && p.type !== 'reel').slice(0, 4) : [];
+            const polaroids = portfolioPosts.length > 0
+                ? portfolioPosts.map(p => `<div class="polaroid"><img class="polaroid-img" src="${p.image}" alt="${p.caption}" /><span class="polaroid-caption">${p.caption}</span></div>`).join('')
+                : [1,2,3,4].map(i => `<div class="polaroid"><div class="polaroid-img polaroid-placeholder"><i class="fas fa-image" style="font-size:1.5rem;color:var(--t2);"></i><span style="font-size:0.6rem;color:var(--t2);">Foto ${i}</span></div><span class="polaroid-caption">momento ${i}</span></div>`).join('');
+            return `<section id="sobre" class="alt"><div class="container">
+                <div class="section-heading">
+                    <span class="section-tag">sobre mim</span>
+                    <h2>Quem sou eu</h2>
+                </div>
+                <div class="about-grid">
+                    <div class="about-text" style="font-size:1rem;line-height:1.9;">${text1}</div>
+                    <div class="about-text" style="font-size:1rem;line-height:1.9;">${text2}</div>
+                </div>
+                <div class="polaroid-grid">${polaroids}</div>
+                <div class="highlights" style="margin-top:3rem;">${highlights.map(h => `<div class="highlight-card fade-in"><div class="highlight-icon"><i class="fas ${h.icon}"></i></div><h3 class="highlight-title">${h.title}</h3><p class="highlight-text">${h.text}</p></div>`).join('')}</div>
+            </div></section>`;
         }
 
         function buildServicos() {
@@ -2453,20 +2924,80 @@
             return `<section id="depoimentos" class="alt"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><div class="testimonials-grid">${items.map(t => `<div class="testimonial-card fade-in"><div class="testimonial-gradient" style="background: ${t.color}; opacity: 0.15;"></div><div class="testimonial-content"><div class="testimonial-stars">${Array(t.stars).fill('<span class="star">★</span>').join('')}</div><p class="testimonial-text">"${t.text}"</p><div class="testimonial-author"><div class="author-avatar" style="background: ${t.color};">${t.initials}</div><div class="author-info"><h4>${t.name}</h4><div class="author-role">${t.role}</div></div></div></div></div>`).join('')}</div></div></section>`;
         }
 
+        function buildBag() {
+            const items = D.bag && D.bag.items ? D.bag.items : [
+                { emoji: '📱', skill: 'Gestão de Redes', desc: 'Estratégia e publicação em Instagram, TikTok e LinkedIn com consistência e intenção.' },
+                { emoji: '✍️', skill: 'Copywriting', desc: 'Legendas que convertem, CTAs irresistíveis e storytelling alinhado à voz da marca.' },
+                { emoji: '🎨', skill: 'Design Visual', desc: 'Artes no Canva Pro e Adobe Express com identidade visual coesa e impacto estético.' },
+                { emoji: '📊', skill: 'Analytics', desc: 'Leitura de métricas, relatórios de desempenho e ajustes estratégicos orientados por dados.' },
+                { emoji: '🔍', skill: 'SEO & Bio', desc: 'Otimização de perfil, palavras-chave estratégicas e posicionamento orgânico.' },
+                { emoji: '🤝', skill: 'Relacionamento', desc: 'Gestão de comunidade, UGC e parcerias com marcas e influenciadores.' },
+            ];
+            return `<section id="bag-section">
+                <div class="container">
+                    <div class="section-heading">
+                        <span class="section-tag">o que eu uso</span>
+                        <h2>O Que Está na Minha Bolsa</h2>
+                        <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--rose);margin-top:0.5rem;">Cada item representa uma competência que entrego para o seu negócio</p>
+                    </div>
+                    <div class="bag-grid">
+                        ${items.map(it => `<div class="bag-item fade-in">
+                            <span class="bag-emoji">${it.emoji}</span>
+                            <div class="bag-skill">${it.skill}</div>
+                            <p class="bag-desc">${it.desc}</p>
+                        </div>`).join('')}
+                    </div>
+                </div>
+            </section>`;
+        }
+
         function buildContato() {
             const { visible, title, subtitle, text, whatsapp, email, instagram, tiktok, youtube, linkedin, pinterest, twitter } = D.contato;
             if (!visible) return '';
-            let btns = '';
-            if (whatsapp) btns += `<a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" class="contact-btn contact-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
-            if (email) btns += `<a href="mailto:${email}" class="contact-btn contact-email"><i class="fas fa-envelope"></i> Email</a>`;
-            let social = '';
-            if (instagram) social += `<a href="https://instagram.com/${instagram.replace('@', '')}" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>`;
-            if (tiktok) social += `<a href="https://tiktok.com/@${tiktok.replace('@', '')}" class="social-link" target="_blank"><i class="fab fa-tiktok"></i></a>`;
-            if (youtube) social += `<a href="https://youtube.com/${youtube}" class="social-link" target="_blank"><i class="fab fa-youtube"></i></a>`;
-            if (linkedin) social += `<a href="https://linkedin.com/in/${linkedin}" class="social-link" target="_blank"><i class="fab fa-linkedin"></i></a>`;
-            if (pinterest) social += `<a href="https://pinterest.com/${pinterest}" class="social-link" target="_blank"><i class="fab fa-pinterest"></i></a>`;
-            if (twitter) social += `<a href="https://twitter.com/${twitter.replace('@', '')}" class="social-link" target="_blank"><i class="fab fa-x-twitter"></i></a>`;
-            return `<section id="contato"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p></div><p style="max-width: 500px; margin: 0 auto 2rem; font-size: 0.95rem; color: var(--t2);">${text}</p><div class="contact-buttons fade-in">${btns}</div>${social ? `<div class="contact-divider"></div><div class="social-links fade-in">${social}</div>` : ''}</div></section>`;
+            const { name1, name2, photo } = D.identity;
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            const avatarHtml = photo ? `<img class="phone-avatar" src="${photo}" alt="${name1}" />` : `<div class="phone-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--bg1);"><i class="fas fa-user" style="color:var(--t2);font-size:1.8rem;"></i></div>`;
+            let links = '';
+            if (whatsapp) links += `<a href="https://wa.me/${whatsapp.replace(/\D/g,'')}" class="phone-link" target="_blank"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp</a>`;
+            if (email) links += `<a href="mailto:${email}" class="phone-link" target="_blank"><i class="fas fa-envelope" style="color:var(--gold);"></i> ${email}</a>`;
+            if (instagram) links += `<a href="https://instagram.com/${instagram.replace('@','')}" class="phone-link" target="_blank"><i class="fab fa-instagram" style="color:#c13584;"></i> ${instagram}</a>`;
+            if (tiktok) links += `<a href="https://tiktok.com/@${tiktok.replace('@','')}" class="phone-link" target="_blank"><i class="fab fa-tiktok"></i> ${tiktok}</a>`;
+            if (linkedin) links += `<a href="https://linkedin.com/in/${linkedin}" class="phone-link" target="_blank"><i class="fab fa-linkedin" style="color:#0077b5;"></i> LinkedIn</a>`;
+            if (youtube) links += `<a href="https://youtube.com/${youtube}" class="phone-link" target="_blank"><i class="fab fa-youtube" style="color:#ff0000;"></i> YouTube</a>`;
+            let socialBtns = '';
+            if (instagram) socialBtns += `<a href="https://instagram.com/${instagram.replace('@','')}" class="phone-social-btn ig" target="_blank"><i class="fab fa-instagram"></i></a>`;
+            if (tiktok) socialBtns += `<a href="https://tiktok.com/@${tiktok.replace('@','')}" class="phone-social-btn tt" target="_blank"><i class="fab fa-tiktok"></i></a>`;
+            if (linkedin) socialBtns += `<a href="https://linkedin.com/in/${linkedin}" class="phone-social-btn li" target="_blank"><i class="fab fa-linkedin"></i></a>`;
+            if (youtube) socialBtns += `<a href="https://youtube.com/${youtube}" class="phone-social-btn yt" target="_blank"><i class="fab fa-youtube"></i></a>`;
+            if (whatsapp) socialBtns += `<a href="https://wa.me/${whatsapp.replace(/\D/g,'')}" class="phone-social-btn wa" target="_blank"><i class="fab fa-whatsapp"></i></a>`;
+            return `<section id="contato">
+                <div class="container" style="text-align:center;margin-bottom:3rem;">
+                    <span class="section-tag">vamos conversar</span>
+                    <h2 style="font-size:clamp(1.8rem,5vw,2.8rem);background:linear-gradient(135deg,var(--t1) 40%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${title}</h2>
+                    <p style="color:var(--t2);margin-top:0.5rem;">${subtitle}</p>
+                </div>
+                <div id="contato-phone">
+                    <div class="phone-wrap">
+                        <div class="phone-device">
+                            <div class="phone-island"></div>
+                            <div class="phone-screen">
+                                <div class="phone-status"><span class="phone-time">${timeStr}</span></div>
+                                <div class="phone-content">
+                                    ${avatarHtml}
+                                    <div class="phone-name">${name1} ${name2}</div>
+                                    <div class="phone-role">${D.identity.subtitle || 'Social Media'}</div>
+                                    <div class="phone-divider"></div>
+                                    <p style="font-size:0.75rem;color:var(--t2);margin-bottom:1.2rem;line-height:1.6;">${text || 'Entre em contato para conversarmos sobre seu projeto.'}</p>
+                                    <div class="phone-links">${links}</div>
+                                    ${socialBtns ? `<div class="phone-social">${socialBtns}</div>` : ''}
+                                </div>
+                                <div class="phone-home-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>`;
         }
 
         function buildFooter() {
@@ -2476,7 +3007,7 @@
         }
 
         function renderAll() {
-            document.getElementById('root').innerHTML = buildNav() + buildHero() + buildSobre() + buildServicos() + buildProcesso() + buildFerramentas() + buildPortfolio() + buildReels() + buildFormacao() + buildMetricas() + buildParcerias() + buildDepoimentos() + buildContato() + buildFooter();
+            document.getElementById('root').innerHTML = buildNav() + buildHero() + buildSobre() + buildServicos() + buildProcesso() + buildFerramentas() + buildPortfolio() + buildReels() + buildBag() + buildFormacao() + buildMetricas() + buildParcerias() + buildDepoimentos() + buildContato() + buildFooter();
             initAnimations();
             initNav();
             initPhotoUpload();
