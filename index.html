@@ -14,6 +14,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
     <script>
         (function() {
+            // Firebase não funciona via file:// — aguarda disparo do evento mesmo assim
+            if (typeof firebase === 'undefined') {
+                window._fbReady = false;
+                window.dispatchEvent(new Event('firebase-ready'));
+                return;
+            }
             const firebaseConfig = {
                 apiKey:            "AIzaSyAu3iSqBGQXHP3Z0oH-axlMf7G2PoWpKxE",
                 authDomain:        "laura-portfolio-cc181.firebaseapp.com",
@@ -72,7 +78,7 @@
                 window.dispatchEvent(new Event('firebase-ready'));
                 console.log('Firebase inicializado com sucesso.');
             } catch(err) {
-                console.error('Erro ao inicializar Firebase:', err);
+                console.warn('Firebase indisponível (file:// ou offline):', err.message);
                 window._fbReady = false;
                 window.dispatchEvent(new Event('firebase-ready'));
             }
@@ -1586,6 +1592,342 @@
             gap: 0.5rem;
         }
 
+
+        /* ══════════════════════════════════════════════════════
+           SEÇÃO REELS — Mockup iPhone Carrossel 3D
+        ══════════════════════════════════════════════════════ */
+        #reels-section {
+            padding: 6rem 2rem;
+            background: var(--bg0);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #reels-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .reels-heading {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .reels-heading h2 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            background: linear-gradient(135deg, #F0EAD6 40%, #C9A84C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .reels-heading p {
+            font-size: 0.95rem;
+            color: var(--t2);
+        }
+
+        .reels-heading .ig-handle {
+            font-size: 0.8rem;
+            color: var(--gold);
+            margin-top: 0.3rem;
+        }
+
+        /* Carrossel wrapper */
+        .reels-carousel-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            height: 620px;
+            perspective: 1200px;
+        }
+
+        .reels-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cada slide/celular */
+        .reel-slide {
+            position: absolute;
+            width: 240px;
+            transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Estado central */
+        .reel-slide.pos-center {
+            transform: translateX(0) scale(1) rotateY(0deg);
+            z-index: 10;
+            filter: none;
+        }
+
+        /* Estado esquerda */
+        .reel-slide.pos-left {
+            transform: translateX(-260px) scale(0.78) rotateY(18deg);
+            z-index: 5;
+            filter: brightness(0.55) blur(1px);
+        }
+
+        /* Estado direita */
+        .reel-slide.pos-right {
+            transform: translateX(260px) scale(0.78) rotateY(-18deg);
+            z-index: 5;
+            filter: brightness(0.55) blur(1px);
+        }
+
+        /* Escondido (fora de vista) */
+        .reel-slide.pos-hidden-left {
+            transform: translateX(-480px) scale(0.55) rotateY(30deg);
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .reel-slide.pos-hidden-right {
+            transform: translateX(480px) scale(0.55) rotateY(-30deg);
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Frame do iPhone */
+        .iphone-frame {
+            position: relative;
+            width: 240px;
+            height: 520px;
+            background: linear-gradient(160deg, #2a2a2a 0%, #111 40%, #1a1a1a 100%);
+            border-radius: 44px;
+            box-shadow:
+                0 0 0 2px #3a3a3a,
+                0 0 0 4px #222,
+                0 25px 60px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            overflow: hidden;
+            padding: 14px;
+        }
+
+        /* Reflexo lateral do iPhone */
+        .iphone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0.04), transparent);
+            border-radius: 44px 0 0 44px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Dynamic Island */
+        .dynamic-island {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 24px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 25;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+        }
+
+        /* Tela do iPhone */
+        .iphone-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 33px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Vídeo dentro da tela */
+        .iphone-screen video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Placeholder quando sem vídeo */
+        .reel-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            background: linear-gradient(160deg, #1a0d20, #0d0a18);
+        }
+
+        .reel-placeholder i {
+            font-size: 2.5rem;
+            color: #c13584;
+            opacity: 0.7;
+        }
+
+        .reel-placeholder span {
+            font-size: 0.7rem;
+            color: var(--t2);
+            text-align: center;
+            padding: 0 1rem;
+            line-height: 1.4;
+        }
+
+        /* Overlay de info na tela (caption/categoria) */
+        .iphone-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 1.5rem 1rem 1rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .reel-slide.pos-center .iphone-overlay {
+            opacity: 1;
+        }
+
+        .iphone-overlay .reel-cat {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.2rem;
+        }
+
+        .iphone-overlay .reel-cap {
+            font-size: 0.75rem;
+            color: #fff;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Ícone de play no centro do iPhone */
+        .iphone-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52px;
+            height: 52px;
+            background: rgba(0,0,0,0.55);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            z-index: 16;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.35);
+            backdrop-filter: blur(4px);
+        }
+
+        .reel-slide.pos-center.is-playing .iphone-play-btn {
+            opacity: 0;
+        }
+
+        .reel-slide.pos-center:active .iphone-play-btn {
+            transform: translate(-50%, -50%) scale(0.88);
+        }
+
+        /* Botões prev/next */
+        .reels-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            margin-top: 2rem;
+        }
+
+        .reels-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-gold);
+            background: rgba(201,168,76,0.06);
+            color: var(--gold);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .reels-nav-btn:hover {
+            background: rgba(201,168,76,0.15);
+            border-color: var(--gold);
+            transform: scale(1.08);
+        }
+
+        /* Dots de paginação */
+        .reels-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.2rem;
+        }
+
+        .reels-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(201,168,76,0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .reels-dot.active {
+            background: var(--gold);
+            width: 20px;
+            border-radius: 3px;
+        }
+
+        /* Barra de progresso do vídeo */
+        .iphone-progress {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.2);
+            z-index: 20;
+        }
+
+        .iphone-progress-bar {
+            height: 100%;
+            background: var(--gold);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Responsivo mobile */
+        @media (max-width: 600px) {
+            .reels-carousel-wrap { height: 520px; }
+            .reel-slide { width: 200px; }
+            .iphone-frame { width: 200px; height: 434px; }
+            .reel-slide.pos-left { transform: translateX(-190px) scale(0.72) rotateY(18deg); }
+            .reel-slide.pos-right { transform: translateX(190px) scale(0.72) rotateY(-18deg); }
+        }
+
         @media (max-width: 768px) {
             nav {
                 padding: 0 1rem;
@@ -1759,6 +2101,13 @@
                     { name: 'SEO & Posicionamento', icon: 'fa-magnifying-glass', items: 'SEMrush,Ubersuggest,Google Trends,Keyword Planner' }
                 ]
             },
+            reels: {
+                visible: true,
+                title: 'Reels',
+                subtitle: 'Conteúdo em vídeo para redes sociais',
+                username: '@lauravieiraarruda',
+                posts: []
+            },
             portfolio: {
                 visible: true,
                 title: 'Portfólio',
@@ -1880,12 +2229,19 @@
             if (toSave.portfolio && toSave.portfolio.posts) {
                 toSave.portfolio.posts = toSave.portfolio.posts.map(p => {
                     const c = Object.assign({}, p);
-                    // vídeo base64 NUNCA persiste — sempre usa videoURL do Storage
                     delete c.video;
-                    // imagem base64: remove sempre — usa image URL do Storage
                     const img = c.image || '';
                     if (img.startsWith('data:')) delete c.image;
-                    // thumb base64 do reel: comprimida mas ainda pode ser grande
+                    const th = c.thumb || '';
+                    if (th.startsWith('data:') && th.length > 50000) delete c.thumb;
+                    return c;
+                });
+            }
+            // Limpa base64 dos reels da seção separada também
+            if (toSave.reels && toSave.reels.posts) {
+                toSave.reels.posts = toSave.reels.posts.map(p => {
+                    const c = Object.assign({}, p);
+                    delete c.video; // base64 nunca persiste
                     const th = c.thumb || '';
                     if (th.startsWith('data:') && th.length > 50000) delete c.thumb;
                     return c;
@@ -2023,6 +2379,56 @@
             return `<section id="portfolio" class="alt"><div class="container"><div class="section-heading"><h2>${title}</h2><p>${subtitle}</p><p style="font-size: 0.8rem; color: var(--gold); margin-top: 0.5rem;">${username}</p></div><div class="portfolio-grid">${items}</div></div></section>`;
         }
 
+        function buildReels() {
+            if (!D.reels || !D.reels.visible) return '';
+            const { title, subtitle, username, posts } = D.reels;
+            if (!posts || posts.length === 0) return '';
+
+            const slides = posts.map((p, i) => {
+                const videoSrc = p.videoURL || p.video || null;
+                const thumb = p.thumb ? `poster="${p.thumb}"` : '';
+                const inner = videoSrc
+                    ? `<video src="${videoSrc}" ${thumb} muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
+                    : `<div class="reel-placeholder"><i class="fab fa-instagram"></i><span>Adicione um vídeo pelo painel admin</span></div>`;
+                return `
+                <div class="reel-slide" data-index="${i}">
+                    <div class="iphone-frame">
+                        <div class="dynamic-island"></div>
+                        <div class="iphone-screen">
+                            ${inner}
+                            <div class="iphone-overlay">
+                                <div class="reel-cat">${p.category || ''}</div>
+                                <div class="reel-cap">${p.caption || ''}</div>
+                            </div>
+                            <div class="iphone-play-btn"><i class="fas fa-play"></i></div>
+                            <div class="iphone-progress"><div class="iphone-progress-bar"></div></div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const dots = posts.map((_, i) => `<div class="reels-dot${i === 0 ? ' active' : ''}" data-dot="${i}"></div>`).join('');
+
+            return `
+            <section id="reels-section">
+                <div class="container">
+                    <div class="reels-heading">
+                        <h2>${title}</h2>
+                        <p>${subtitle}</p>
+                        <p class="ig-handle">${username}</p>
+                    </div>
+                    <div class="reels-carousel-wrap">
+                        <div class="reels-track" id="reels-track">${slides}</div>
+                    </div>
+                    <div class="reels-nav">
+                        <button class="reels-nav-btn" id="reels-prev"><i class="fas fa-chevron-left"></i></button>
+                        <button class="reels-nav-btn" id="reels-next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="reels-dots" id="reels-dots">${dots}</div>
+                </div>
+            </section>`;
+        }
+
         function buildFormacao() {
             const { visible, title, subtitle, items } = D.formacao;
             if (!visible) return '';
@@ -2070,10 +2476,11 @@
         }
 
         function renderAll() {
-            document.getElementById('root').innerHTML = buildNav() + buildHero() + buildSobre() + buildServicos() + buildProcesso() + buildFerramentas() + buildPortfolio() + buildFormacao() + buildMetricas() + buildParcerias() + buildDepoimentos() + buildContato() + buildFooter();
+            document.getElementById('root').innerHTML = buildNav() + buildHero() + buildSobre() + buildServicos() + buildProcesso() + buildFerramentas() + buildPortfolio() + buildReels() + buildFormacao() + buildMetricas() + buildParcerias() + buildDepoimentos() + buildContato() + buildFooter();
             initAnimations();
             initNav();
             initPhotoUpload();
+            initReelsCarousel();
             document.title = D.meta.title;
         }
 
@@ -2100,6 +2507,121 @@
 
         function initPhotoUpload() {
             // Upload de foto disponível somente pelo painel Admin → Identidade
+        }
+
+        // ── Carrossel de Reels (iPhone mockup) ───────────────────────────────────
+        function initReelsCarousel() {
+            const track = document.getElementById('reels-track');
+            if (!track) return;
+            const slides = Array.from(track.querySelectorAll('.reel-slide'));
+            if (slides.length === 0) return;
+
+            let current = 0;
+            let progressInterval = null;
+
+            const positions = ['pos-hidden-left','pos-left','pos-center','pos-right','pos-hidden-right'];
+
+            function getPos(slideIdx, currentIdx, total) {
+                const diff = (slideIdx - currentIdx + total) % total;
+                if (diff === 0) return 'pos-center';
+                if (diff === 1) return 'pos-right';
+                if (diff === total - 1) return 'pos-left';
+                if (diff === 2) return 'pos-hidden-right';
+                return 'pos-hidden-left';
+            }
+
+            function updateSlides() {
+                slides.forEach((slide, i) => {
+                    slide.className = 'reel-slide ' + getPos(i, current, slides.length);
+                });
+                // Dots
+                const dots = document.querySelectorAll('.reels-dot');
+                dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            }
+
+            function stopProgress() {
+                clearInterval(progressInterval);
+                document.querySelectorAll('.iphone-progress-bar').forEach(b => b.style.width = '0%');
+            }
+
+            function startProgress(video, bar) {
+                stopProgress();
+                progressInterval = setInterval(() => {
+                    if (!video.duration) return;
+                    bar.style.width = ((video.currentTime / video.duration) * 100) + '%';
+                }, 100);
+            }
+
+            function playCenter() {
+                const centerSlide = slides[current];
+                const video = centerSlide.querySelector('video');
+                const bar = centerSlide.querySelector('.iphone-progress-bar');
+                if (!video) return;
+                video.play().then(() => {
+                    centerSlide.classList.add('is-playing');
+                    if (bar) startProgress(video, bar);
+                }).catch(() => {});
+            }
+
+            function pauseAll() {
+                slides.forEach(slide => {
+                    const v = slide.querySelector('video');
+                    if (v) v.pause();
+                    slide.classList.remove('is-playing');
+                });
+                stopProgress();
+            }
+
+            function goTo(idx) {
+                pauseAll();
+                current = (idx + slides.length) % slides.length;
+                updateSlides();
+                // pequeno delay para transição CSS completar
+                setTimeout(playCenter, 300);
+            }
+
+            // Click no slide lateral: vai para ele
+            slides.forEach((slide, i) => {
+                slide.addEventListener('click', () => {
+                    if (slide.classList.contains('pos-center')) {
+                        // toggle play/pause no central
+                        const v = slide.querySelector('video');
+                        if (!v) return;
+                        if (v.paused) {
+                            v.play().then(() => { slide.classList.add('is-playing'); }).catch(()=>{});
+                        } else {
+                            v.pause();
+                            slide.classList.remove('is-playing');
+                        }
+                    } else {
+                        goTo(i);
+                    }
+                });
+            });
+
+            // Botões prev/next
+            const prevBtn = document.getElementById('reels-prev');
+            const nextBtn = document.getElementById('reels-next');
+            if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+            if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+
+            // Dots
+            document.querySelectorAll('.reels-dot').forEach((dot, i) => {
+                dot.addEventListener('click', () => goTo(i));
+            });
+
+            // Swipe touch
+            let touchStartX = 0;
+            track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+            track.addEventListener('touchend', e => {
+                const diff = touchStartX - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
+            });
+
+            // Inicializa posições
+            updateSlides();
+            // Toca o primeiro automaticamente se possível
+            setTimeout(playCenter, 600);
         }
 
         let curTab = 'identidade';
@@ -2152,6 +2674,7 @@
                 { id: 'processo', label: 'Processo', icon: 'fa-map' },
                 { id: 'ferramentas', label: 'Ferramentas', icon: 'fa-tools' },
                 { id: 'portfolio', label: 'Portfólio', icon: 'fa-images' },
+                { id: 'reels_section', label: 'Reels', icon: 'fa-film' },
                 { id: 'formacao', label: 'Formação', icon: 'fa-graduation-cap' },
                 { id: 'metricas', label: 'Métricas', icon: 'fa-chart-bar' },
                 { id: 'parcerias', label: 'Parcerias', icon: 'fa-handshake' },
@@ -2256,6 +2779,23 @@ ${isReel
 ${field('Categoria', `<input type="text" value="${p.category}" onchange="sp('portfolio.posts.${i}.category', this.value)" />`)}${field('Caption', `<input type="text" value="${p.caption}" onchange="sp('portfolio.posts.${i}.caption', this.value)" />`)}${!isReel ? field('Gradiente (fundo sem imagem)', `<input type="text" value="${p.gradient || ''}" onchange="sp('portfolio.posts.${i}.gradient', this.value)" />`) : ''}</div>`;
                 }).join('')}<button class="adm-add-btn" onclick="addItem('portfolio', {type:'post', gradient: 'linear-gradient(135deg,#3d1a20,#1a0d12)', icon: 'fa-star', icon_color: 'rgba(201,168,76,.38)', category: 'Novo', caption: 'Desc', image: null})">+ Adicionar Post</button>
 <button class="adm-add-btn" style="margin-top:0.5rem;border-color:rgba(193,53,132,0.5);color:#c13584;" onclick="addItem('portfolio', {type:'reel', video:null, thumb:null, category:'Reel', caption:'Descrição do reel', gradient:'linear-gradient(135deg,#1a0d20,#0d0a18)'})">+ Adicionar Reel</button>`;
+            },
+            reels_section: () => {
+                if (!D.reels) D.reels = { visible: true, title: 'Reels', subtitle: 'Conteúdo em vídeo', username: '@lauravieiraarruda', posts: [] };
+                return `${tog('reels.visible', 'Mostrar Seção Reels')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('reels.title'))}${field('Subtítulo', inp('reels.subtitle'))}${field('Username', inp('reels.username'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">🎬 Reels</h3>${D.reels.posts.map((p, i) => {
+                    const videoSrcAdmin = p.videoURL || p.video || null;
+                    const videoBlock = videoSrcAdmin
+                        ? \`<div style="margin-top:0.5rem;border-radius:6px;overflow:hidden;position:relative;aspect-ratio:9/16;max-height:180px;">
+                            <video src="\${videoSrcAdmin}" muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block;" onmouseenter="this.play()" onmouseleave="this.pause()"></video>
+                            \${p.videoURL ? '<div style=\'position:absolute;bottom:4px;left:4px;background:rgba(0,150,0,0.8);color:white;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:4px;\'>☁️ Firebase</div>' : ''}
+                            <button onclick="removeReelVideo(\${i})" style="position:absolute;top:4px;right:4px;background:rgba(183,110,121,0.85);color:white;border:none;border-radius:4px;padding:0.2rem 0.5rem;font-size:0.65rem;cursor:pointer;">✕ Remover</button>
+                           </div>\`
+                        : '<div style="background:rgba(193,53,132,0.08);border:1px dashed rgba(193,53,132,0.4);border-radius:6px;padding:0.6rem;margin-top:0.4rem;font-size:0.72rem;color:var(--t2);text-align:center;">Nenhum vídeo</div>';
+                    return \`<div class="adm-item"><div class="adm-item-header"><span>🎬 Reel \${i + 1}</span><button class="adm-item-remove" onclick="removeReelItem(\${i})">Remover</button></div>
+\${field('Vídeo', \`<label class="adm-file-label" style="border-color:rgba(193,53,132,0.4);"><i class="fab fa-instagram" style="color:#c13584;"></i> \${p.video || p.videoURL ? 'Trocar vídeo' : 'Upload do vídeo (.mp4, .mov)'}<input type="file" accept="video/*" onchange="handleReelVideo(event, \${i})" /></label><p style="font-size:0.68rem;color:var(--t2);margin-top:0.3rem;">💡 Baixe o vídeo do Reel e faça upload aqui. Máx 300MB.</p>\${videoBlock}\`)}
+\${field('Categoria', \`<input type="text" value="\${p.category||''}" onchange="sp('reels.posts.\${i}.category', this.value)" />\`)}
+\${field('Caption', \`<input type="text" value="\${p.caption||''}" onchange="sp('reels.posts.\${i}.caption', this.value)" />\`)}</div>\`;
+                }).join('')}<button class="adm-add-btn" style="border-color:rgba(193,53,132,0.5);color:#c13584;" onclick="addReelItem()">+ Adicionar Reel</button>`;
             },
             formacao: () => {
                 return `${tog('formacao.visible', 'Mostrar Seção')}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />${field('Título', inp('formacao.title'))}${field('Subtítulo', inp('formacao.subtitle'))}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Itens</h3>${D.formacao.items.map((i, idx) => `<div class="adm-item"><div class="adm-item-header"><span>${i.title}</span><button class="adm-item-remove" onclick="removeItem('formacao', ${idx})">Remover</button></div>${field('Tipo', `<select onchange="sp('formacao.items.${idx}.type', this.value)"><option value="graduation" ${i.type === 'graduation' ? 'selected' : ''}>Graduação</option><option value="cert" ${i.type === 'cert' ? 'selected' : ''}>Certificado</option><option value="course" ${i.type === 'course' ? 'selected' : ''}>Curso</option></select>`)}${field('Ícone', `<input type="text" value="${i.icon}" onchange="sp('formacao.items.${idx}.icon', this.value)" />`)}${field('Título', `<input type="text" value="${i.title}" onchange="sp('formacao.items.${idx}.title', this.value)" />`)}${field('Instituição', `<input type="text" value="${i.institution}" onchange="sp('formacao.items.${idx}.institution', this.value)" />`)}${field('Ano', `<input type="text" value="${i.year}" onchange="sp('formacao.items.${idx}.year', this.value)" />`)}${field('Desc', `<textarea onchange="sp('formacao.items.${idx}.desc', this.value)">${i.desc}</textarea>`)}</div>`).join('')}<button class="adm-add-btn" onclick="addItem('formacao', {type: 'course', icon: 'fa-book', title: 'Novo', institution: 'Inst', year: '2024', desc: 'Desc'})">+ Adicionar</button>`;
@@ -2510,6 +3050,82 @@ ${colorField('Texto Secundário', 't2')}
             reader.readAsDataURL(file);
         }
 
+        // ── Handlers da seção Reels separada ────────────────────────────────────
+        function addReelItem() {
+            if (!D.reels) D.reels = { visible: true, title: 'Reels', subtitle: '', username: '', posts: [] };
+            if (!D.reels.posts) D.reels.posts = [];
+            D.reels.posts.push({ video: null, videoURL: null, videoPath: null, thumb: null, category: 'Reel', caption: '' });
+            showTab('reels_section');
+        }
+
+        async function removeReelItem(index) {
+            const post = D.reels.posts[index];
+            if (post && post.videoPath && window._fbReady) {
+                try { await window._fb.deleteVideo(post.videoPath); } catch(e) {}
+            }
+            D.reels.posts.splice(index, 1);
+            await saveData();
+            renderAll();
+            showTab('reels_section');
+        }
+
+        async function removeReelVideo(index) {
+            const post = D.reels.posts[index];
+            if (post && post.videoPath && window._fbReady) {
+                try { await window._fb.deleteVideo(post.videoPath); } catch(e) {}
+            }
+            D.reels.posts[index].video = null;
+            D.reels.posts[index].videoURL = null;
+            D.reels.posts[index].videoPath = null;
+            D.reels.posts[index].thumb = null;
+            await saveData();
+            showTab('reels_section');
+        }
+
+        async function handleReelVideo(e, index) {
+            if (!e.target.files[0]) return;
+            const file = e.target.files[0];
+            if (file.size > 300 * 1024 * 1024) { notify('Vídeo muito grande (máx 300MB)', 'error'); return; }
+            notify('Fazendo upload do reel...', 'success');
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                const b64 = evt.target.result;
+                D.reels.posts[index].video = b64;
+                const vid = document.createElement('video');
+                vid.src = b64;
+                vid.currentTime = 0.5;
+                vid.addEventListener('seeked', async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400; canvas.height = 711; // 9:16
+                    const ctx = canvas.getContext('2d');
+                    const vw = vid.videoWidth, vh = vid.videoHeight;
+                    ctx.drawImage(vid, 0, 0, vw, vh, 0, 0, 400, 711);
+                    D.reels.posts[index].thumb = canvas.toDataURL('image/jpeg', 0.6);
+                    showTab('reels_section');
+                    if (window._fbReady && window._fb) {
+                        try {
+                            const oldPath = D.reels.posts[index].videoPath;
+                            if (oldPath) await window._fb.deleteVideo(oldPath);
+                            const { url, path } = await window._fb.uploadVideo(file, 'rs_' + index);
+                            D.reels.posts[index].videoURL = url;
+                            D.reels.posts[index].videoPath = path;
+                            D.reels.posts[index].video = url;
+                            await saveData();
+                            renderAll();
+                            showTab('reels_section');
+                            notify('Reel salvo!', 'success');
+                        } catch(err) {
+                            await saveData();
+                            notify('Upload falhou — reel em memória temporária', 'error');
+                        }
+                    } else {
+                        await saveData();
+                    }
+                }, { once: true });
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function removePortfolioVideo(index) {
             const post = D.portfolio.posts[index];
             if (post.videoPath && window._fbReady) {
@@ -2591,15 +3207,20 @@ ${colorField('Texto Secundário', 't2')}
 
             // Se Firebase já carregou (module scripts são rápidos), inicia direto.
             // Caso contrário aguarda o evento, com timeout de 4s para fallback.
-            if (window._fbReady) {
-                init();
+            const safeInit = () => {
+                try { init(); } catch(e) { console.error('Init error:', e); }
+            };
+
+            if (window._fbReady !== undefined) {
+                // Firebase já tentou inicializar (sucesso ou falha)
+                safeInit();
             } else {
                 let done = false;
                 const timeout = setTimeout(() => {
-                    if (!done) { done = true; console.warn('Firebase timeout — usando localStorage'); init(); }
-                }, 4000);
+                    if (!done) { done = true; console.warn('Firebase timeout — usando localStorage'); safeInit(); }
+                }, 2000); // 2s é suficiente
                 window.addEventListener('firebase-ready', () => {
-                    if (!done) { done = true; clearTimeout(timeout); init(); }
+                    if (!done) { done = true; clearTimeout(timeout); safeInit(); }
                 });
             }
         });
