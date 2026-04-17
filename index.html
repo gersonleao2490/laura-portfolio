@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script>
         (function() {
             // Firebase não funciona via file:// — aguarda disparo do evento mesmo assim
@@ -73,6 +74,10 @@
                         try { await storage.ref(path).delete(); } catch(e) {}
                     }
                 };
+
+                // Autenticação anônima — necessária para regras Firestore/Storage com auth != null
+                const auth = firebase.auth();
+                auth.signInAnonymously().catch(e => console.warn('Auth anônima falhou:', e.message));
 
                 window._fbReady = true;
                 window.dispatchEvent(new Event('firebase-ready'));
@@ -3659,14 +3664,12 @@
             const toSave = JSON.parse(JSON.stringify(D));
             delete toSave.meta.password;
 
-            // foto de perfil: remove base64, mantém URL do Storage
+            // foto de perfil: remove base64 só se já existe URL permanente no Storage
             if (toSave.identity) {
                 const ph = toSave.identity.photo || '';
-                if (ph.startsWith('data:')) {
-                    // sem URL do Storage ainda — remove para não estourar Firestore
+                if (ph.startsWith('data:') && toSave.identity.photoPath) {
                     delete toSave.identity.photo;
                 }
-                // base64 do vídeo de identidade (não existe, mas por precaução)
             }
 
             if (toSave.portfolio && toSave.portfolio.posts) {
@@ -3674,7 +3677,8 @@
                     const c = Object.assign({}, p);
                     delete c.video;
                     const img = c.image || '';
-                    if (img.startsWith('data:')) delete c.image;
+                    // só remove base64 se JÁ existe URL permanente do Storage (imagePath presente)
+                    if (img.startsWith('data:') && c.imagePath) delete c.image;
                     const th = c.thumb || '';
                     if (th.startsWith('data:') && th.length > 50000) delete c.thumb;
                     return c;
@@ -3684,10 +3688,9 @@
             if (toSave.polaroids && toSave.polaroids.items) {
                 toSave.polaroids.items = toSave.polaroids.items.map(p => {
                     const c = Object.assign({}, p);
-                    if (c.imagePath) {
-                        const img = c.image || '';
-                        if (img.startsWith('data:')) delete c.image;
-                    }
+                    const img = c.image || '';
+                    // só remove base64 se JÁ foi enviado ao Storage
+                    if (img.startsWith('data:') && c.imagePath) delete c.image;
                     return c;
                 });
             }
@@ -4619,9 +4622,10 @@ ${colorField('Texto Secundário', 't2')}
                     showTab('portfolio');
                     notify('Imagem salva!', 'success');
                 } catch(err) {
-                    console.error('Upload imagem falhou:', err);
+                    console.error('Upload imagem falhou:', err.code || err.message, err);
+                    // base64 ainda está em D (preview) — salva como fallback
                     await saveData();
-                    notify('Erro no upload — imagem pode não aparecer no celular', 'error');
+                    notify('Upload falhou (' + (err.code || err.message) + '). Verifique as regras do Firebase.', 'error');
                 }
             } else {
                 await saveData();
