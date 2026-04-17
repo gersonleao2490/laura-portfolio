@@ -75,13 +75,27 @@
                     }
                 };
 
-                // Autenticação anônima — necessária para regras Firestore com auth != null
+                // Autenticação anônima — aguarda confirmação ANTES de emitir firebase-ready
+                // (Firestore bloqueia leituras se auth != null e o login ainda não completou)
                 const auth = firebase.auth();
-                auth.signInAnonymously().catch(e => console.warn('Auth anônima falhou:', e.message));
-
-                window._fbReady = true;
-                window.dispatchEvent(new Event('firebase-ready'));
-                console.log('Firebase inicializado com sucesso.');
+                let _authDone = false;
+                const _dispatchReady = () => {
+                    if (_authDone) return;
+                    _authDone = true;
+                    window._fbReady = true;
+                    window.dispatchEvent(new Event('firebase-ready'));
+                    console.log('Firebase pronto (auth confirmada).');
+                };
+                auth.onAuthStateChanged(user => {
+                    if (user) { _dispatchReady(); }
+                });
+                auth.signInAnonymously().catch(e => {
+                    console.warn('Auth anônima falhou:', e.message);
+                    // mesmo sem auth, libera o app (vai usar localStorage)
+                    if (!_authDone) { _authDone = true; window._fbReady = false; window.dispatchEvent(new Event('firebase-ready')); }
+                });
+                // Segurança: se auth demorar >5s, libera mesmo assim
+                setTimeout(() => { if (!_authDone) { _authDone = true; window._fbReady = true; window.dispatchEvent(new Event('firebase-ready')); } }, 5000);
             } catch(err) {
                 console.warn('Firebase indisponível (file:// ou offline):', err.message);
                 window._fbReady = false;
@@ -2625,6 +2639,7 @@
             <div class="adm-title">Administrador</div>
             <div class="adm-topbar-btns">
                 <button class="adm-btn adm-btn-save" onclick="saveAndApply()">Salvar Alterações</button>
+                <button class="adm-btn adm-btn-secondary" onclick="reloadFromFirebase()" title="Recarregar todos os dados do Firebase">🔄 Recarregar Firebase</button>
                 <button class="adm-btn adm-btn-secondary" onclick="exportJSON()">Exportar JSON</button>
                 <button class="adm-btn adm-btn-secondary" onclick="importJSON()">Importar JSON</button>
                 <button class="adm-btn-close" onclick="closeAdmin()"><i class="fas fa-times"></i></button>
@@ -2859,10 +2874,12 @@
             // senha sempre do localStorage (nunca no Firebase)
             const storedPwd = localStorage.getItem(SK_PWD);
 
-            if (window._fbReady) {
+            if (window._fbReady && window._fb) {
                 try {
+                    console.log('🔥 Tentando carregar do Firestore...');
                     const remote = await window._fb.loadData();
                     if (remote) {
+                        console.log('✅ Dados carregados do Firestore. Posts portfólio:', (remote.portfolio?.posts||[]).length, '| Reels:', (remote.reels?.posts||[]).length);
                         D = remote;
                         Object.keys(DEFAULTS).forEach(k => {
                             if (!(k in D)) D[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
@@ -2870,14 +2887,25 @@
                         migrateColors(D);
                         fixTypos(D);
                         D.meta.password = storedPwd || DEFAULTS.meta.password;
+                        // Atualiza cache local com dados frescos do Firebase
+                        _saveLocalFallback(_stripHeavyData(D));
                         return;
+                    } else {
+                        console.warn('⚠️ Firestore retornou vazio — usando localStorage');
                     }
                 } catch(e) {
-                    console.warn('Firebase loadData falhou, usando localStorage:', e);
+                    console.warn('❌ Firebase loadData falhou:', e.code, e.message);
                 }
+            } else {
+                console.warn('⚠️ _fbReady=', window._fbReady, '— carregando localStorage');
             }
             // fallback localStorage
             const stored = localStorage.getItem(SK);
+            if (stored) {
+                console.log('📦 Carregando do localStorage (fallback)');
+            } else {
+                console.log('📋 Nenhum dado local — usando DEFAULTS');
+            }
             D = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULTS));
             Object.keys(DEFAULTS).forEach(k => {
                 if (!(k in D)) D[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
@@ -2885,6 +2913,15 @@
             migrateColors(D);
             fixTypos(D);
             D.meta.password = storedPwd || DEFAULTS.meta.password;
+        }
+
+        // Recarrega dados do Firestore e re-renderiza (útil após problemas de auth)
+        async function reloadFromFirebase() {
+            notify('Recarregando dados do Firebase...', 'success');
+            await loadData();
+            applyColors();
+            renderAll();
+            notify('✅ Dados recarregados!', 'success');
         }
 
         // ── saveData: Firebase + localStorage (fallback) ──────────────────────────
@@ -3686,7 +3723,25 @@ ${colorField('Texto Secundário', 't2')}
 <button class="adm-btn adm-btn-secondary" style="width:100%;margin-bottom:0.8rem;" onclick="D.colors={bg0:'#FDF8F5',bg1:'#F5EBE8',bgc:'#FFFFFF',gold:'#C8717A',gold_l:'#E0959C',gold_d:'#A84E57',rose:'#D4849A',rose_l:'#E8B4C2',t1:'#2A1520',t2:'#7A5560'}; applyColors(); showTab('cores'); notify('Cores resetadas', 'success');">↺ Resetar Cores Padrão</button>`;
             },
             config: () => {
-                return `<h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Configurações</h3>${field('Título da Página', inp('meta.title'))}${field('Nova Senha', `<input type="password" placeholder="Deixar em branco para não alterar" onchange="if(this.value) updatePassword(this.value)" />`)}<hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" /><button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Resetar TODOS os dados?')) { D = JSON.parse(JSON.stringify(DEFAULTS)); localStorage.removeItem(SK_PWD); localStorage.removeItem(SK); applyColors(); saveData().then(() => { renderAll(); closeAdmin(); notify('Resetado', 'success'); }); }">Resetar Tudo</button><button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Deletar TODOS os dados?')) { localStorage.removeItem(SK); localStorage.removeItem(SK_PWD); location.reload(); }">Limpar Dados</button>`;
+                const fbStatus = window._fbReady && window._fb
+                    ? `<div style="background:rgba(0,180,0,0.1);border:1px solid rgba(0,180,0,0.4);border-radius:6px;padding:0.8rem;margin-bottom:1rem;font-size:0.8rem;">
+                        <strong style="color:#2d7a2d;">✅ Firebase conectado</strong><br>
+                        Posts portfólio: <strong>${(D.portfolio?.posts||[]).length}</strong> | 
+                        Reels seção: <strong>${(D.reels?.posts||[]).length}</strong><br>
+                        Posts com imagem URL: <strong>${(D.portfolio?.posts||[]).filter(p=>p.image&&p.image.startsWith('http')).length}</strong> |
+                        Posts sem imagem: <strong>${(D.portfolio?.posts||[]).filter(p=>!p.image).length}</strong>
+                       </div>`
+                    : `<div style="background:rgba(200,0,0,0.1);border:1px solid rgba(200,0,0,0.4);border-radius:6px;padding:0.8rem;margin-bottom:1rem;font-size:0.8rem;">
+                        <strong style="color:#a00;">❌ Firebase NÃO conectado</strong> — dados vêm do localStorage
+                       </div>`;
+                return `<h3 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem;">Configurações</h3>
+                ${fbStatus}
+                <button class="adm-btn adm-btn-secondary" style="width:100%;margin-bottom:0.8rem;" onclick="reloadFromFirebase()">🔄 Forçar recarga do Firebase</button>
+                <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;" />
+                ${field('Título da Página', inp('meta.title'))}${field('Nova Senha', `<input type="password" placeholder="Deixar em branco para não alterar" onchange="if(this.value) updatePassword(this.value)" />`)}
+                <hr style="border:none; border-top:1px solid var(--border); margin: 1.5rem 0;" />
+                <button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Resetar TODOS os dados?')) { D = JSON.parse(JSON.stringify(DEFAULTS)); localStorage.removeItem(SK_PWD); localStorage.removeItem(SK); applyColors(); saveData().then(() => { renderAll(); closeAdmin(); notify('Resetado', 'success'); }); }">Resetar Tudo</button>
+                <button class="adm-btn adm-btn-secondary" style="width: 100%; margin-bottom: 0.8rem;" onclick="if(confirm('Deletar TODOS os dados?')) { localStorage.removeItem(SK); localStorage.removeItem(SK_PWD); location.reload(); }">Limpar Dados</button>`;
             }
         };
 
