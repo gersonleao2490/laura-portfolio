@@ -2870,6 +2870,89 @@
             }
         }
 
+        // Recupera URL pública do Storage a partir do path salvo
+        async function _resolveStorageURL(path) {
+            if (!path || !window._fb) return null;
+            try {
+                const storage = firebase.storage();
+                const url = await storage.ref(path).getDownloadURL();
+                return url;
+            } catch(e) {
+                console.warn('Não conseguiu URL para path:', path, e.message);
+                return null;
+            }
+        }
+
+        // Após carregar dados do Firestore, resolve todas as URLs de imagem/vídeo
+        // que tenham path mas não tenham URL (dados salvos antes da correção)
+        async function _resolveAllURLs(data) {
+            const tasks = [];
+
+            // Foto de perfil
+            if (data.identity && data.identity.photoPath && !data.identity.photo) {
+                tasks.push(
+                    _resolveStorageURL(data.identity.photoPath).then(url => {
+                        if (url) { data.identity.photo = url; data.identity.photoURL = url; }
+                    })
+                );
+            }
+
+            // Posts do portfólio
+            if (data.portfolio && data.portfolio.posts) {
+                data.portfolio.posts.forEach((p, i) => {
+                    // Imagem sem URL
+                    if (p.imagePath && !p.image) {
+                        tasks.push(
+                            _resolveStorageURL(p.imagePath).then(url => {
+                                if (url) { data.portfolio.posts[i].image = url; data.portfolio.posts[i].imageURL = url; }
+                            })
+                        );
+                    }
+                    // Vídeo sem URL
+                    if (p.videoPath && !p.videoURL && !p.video) {
+                        tasks.push(
+                            _resolveStorageURL(p.videoPath).then(url => {
+                                if (url) { data.portfolio.posts[i].videoURL = url; data.portfolio.posts[i].video = url; }
+                            })
+                        );
+                    }
+                });
+            }
+
+            // Polaroids
+            if (data.polaroids && data.polaroids.items) {
+                data.polaroids.items.forEach((p, i) => {
+                    if (p.imagePath && !p.image) {
+                        tasks.push(
+                            _resolveStorageURL(p.imagePath).then(url => {
+                                if (url) { data.polaroids.items[i].image = url; data.polaroids.items[i].imageURL = url; }
+                            })
+                        );
+                    }
+                });
+            }
+
+            // Reels
+            if (data.reels && data.reels.posts) {
+                data.reels.posts.forEach((p, i) => {
+                    if (p.videoPath && !p.videoURL && !p.video) {
+                        tasks.push(
+                            _resolveStorageURL(p.videoPath).then(url => {
+                                if (url) { data.reels.posts[i].videoURL = url; data.reels.posts[i].video = url; }
+                            })
+                        );
+                    }
+                });
+            }
+
+            if (tasks.length > 0) {
+                console.log('🔗 Resolvendo', tasks.length, 'URL(s) do Storage...');
+                await Promise.all(tasks);
+                console.log('✅ URLs resolvidas.');
+            }
+            return data;
+        }
+
         async function loadData() {
             // senha sempre do localStorage (nunca no Firebase)
             const storedPwd = localStorage.getItem(SK_PWD);
@@ -2887,7 +2970,9 @@
                         migrateColors(D);
                         fixTypos(D);
                         D.meta.password = storedPwd || DEFAULTS.meta.password;
-                        // Atualiza cache local com dados frescos do Firebase
+                        // Resolve URLs faltantes (dados antigos sem imageURL)
+                        await _resolveAllURLs(D);
+                        // Atualiza cache local com dados frescos e URLs resolvidas
                         _saveLocalFallback(_stripHeavyData(D));
                         return;
                     } else {
@@ -2921,6 +3006,8 @@
             await loadData();
             applyColors();
             renderAll();
+            // Renderiza de novo após resolver URLs (podem ter chegado depois do primeiro render)
+            setTimeout(() => { applyColors(); renderAll(); }, 500);
             notify('✅ Dados recarregados!', 'success');
         }
 
@@ -4199,6 +4286,8 @@ ${colorField('Texto Secundário', 't2')}
                 await loadData();
                 applyColors();
                 renderAll();
+                // Segunda renderização para pegar URLs resolvidas assincronamente
+                setTimeout(() => { applyColors(); renderAll(); }, 800);
                 document.getElementById('adm-fab').addEventListener('click', () => {
                     openAdminLogin();
                 });
