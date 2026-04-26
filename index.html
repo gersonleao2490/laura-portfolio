@@ -64,8 +64,12 @@
                     async uploadImage(blob, folder, name) {
                         const path = folder + '/' + name + '_' + Date.now() + '.jpg';
                         const storageRef = storage.ref(path);
-                        await storageRef.put(blob, { contentType: 'image/jpeg' });
+                        const metadata = { contentType: 'image/jpeg' };
+                        console.log('[Storage] Iniciando upload:', path, 'tamanho:', blob.size, 'bytes');
+                        const snapshot = await storageRef.put(blob, metadata);
+                        console.log('[Storage] Upload concluído:', snapshot.totalBytes, 'bytes');
                         const url = await storageRef.getDownloadURL();
+                        console.log('[Storage] URL obtida:', url.substring(0, 80) + '...');
                         return { url: url, path: path };
                     },
 
@@ -3034,77 +3038,43 @@
         }
 
         function _stripHeavyData(D) {
-            // Remove base64 antes de salvar no Firestore (limite 1MB por doc).
-            // REGRA: só remove base64 se existir URL permanente do Storage para substituir.
-            // Se não há URL, mantém o base64 — melhor salvar pesado do que perder o dado.
+            // Regra simples: NUNCA salva base64 no Firestore (limite 1MB).
+            // Se tem URL do Storage usa ela. Senão, null. O PATH sempre fica salvo.
             const toSave = JSON.parse(JSON.stringify(D));
             delete toSave.meta.password;
 
             // Foto de perfil
             if (toSave.identity) {
-                const ph = toSave.identity.photo || '';
-                if (ph.startsWith('data:')) {
-                    if (toSave.identity.photoPath && toSave.identity.photoURL) {
-                        // Tem URL permanente: usa ela e descarta o base64
-                        toSave.identity.photo = toSave.identity.photoURL;
-                    } else if (toSave.identity.photoPath) {
-                        // Tem path mas não salvou photoURL — mantém base64 para não perder
-                        // (situação rara; upload concluiu mas URL não foi gravada)
-                    }
-                    // Sem photoPath: mantém base64 (upload ainda não ocorreu)
-                }
+                if ((toSave.identity.photo || '').startsWith('data:'))
+                    toSave.identity.photo = toSave.identity.photoURL || null;
             }
 
             // Posts do portfólio
             if (toSave.portfolio && toSave.portfolio.posts) {
                 toSave.portfolio.posts = toSave.portfolio.posts.map(p => {
                     const c = Object.assign({}, p);
-                    // Vídeo base64 NUNCA persiste (muito pesado); usa videoURL se disponível
-                    if ((c.video || '').startsWith('data:')) {
-                        c.video = c.videoURL || null;
-                    }
-                    // Imagem: só apaga base64 se já há URL permanente
-                    const img = c.image || '';
-                    if (img.startsWith('data:')) {
-                        if (c.imagePath && c.imageURL) {
-                            c.image = c.imageURL;
-                        } else if (c.imagePath) {
-                            // mantém base64 — upload ocorreu mas imageURL não foi salva
-                        }
-                        // sem imagePath: mantém base64
-                    }
-                    // Thumb grande: remove se tiver URL de vídeo (o thumb é gerado localmente)
-                    const th = c.thumb || '';
-                    if (th.startsWith('data:') && th.length > 50000 && c.videoURL) delete c.thumb;
+                    if ((c.video || '').startsWith('data:')) c.video = c.videoURL || null;
+                    if ((c.image || '').startsWith('data:')) c.image = c.imageURL || null;
+                    if ((c.thumb || '').startsWith('data:')) delete c.thumb;
                     return c;
                 });
             }
 
-            // Polaroids (Sobre)
+            // Polaroids
             if (toSave.polaroids && toSave.polaroids.items) {
                 toSave.polaroids.items = toSave.polaroids.items.map(p => {
                     const c = Object.assign({}, p);
-                    const img = c.image || '';
-                    if (img.startsWith('data:')) {
-                        if (c.imagePath && c.imageURL) {
-                            c.image = c.imageURL;
-                        } else if (c.imagePath) {
-                            // mantém base64
-                        }
-                    }
+                    if ((c.image || '').startsWith('data:')) c.image = c.imageURL || null;
                     return c;
                 });
             }
 
-            // Reels da seção separada
+            // Reels
             if (toSave.reels && toSave.reels.posts) {
                 toSave.reels.posts = toSave.reels.posts.map(p => {
                     const c = Object.assign({}, p);
-                    if ((c.video || '').startsWith('data:')) {
-                        c.video = c.videoURL || null;
-                    }
-                    const th = c.thumb || '';
-                    if (th.startsWith('data:') && th.length > 50000 && c.videoURL) delete c.thumb;
+                    if ((c.video || '').startsWith('data:')) c.video = c.videoURL || null;
+                    if ((c.thumb || '').startsWith('data:')) delete c.thumb;
                     return c;
                 });
             }
@@ -3997,6 +3967,7 @@ ${colorField('Texto Secundário', 't2')}
         async function handlePortfolioImage(e, index) {
             if (!e.target.files[0]) return;
             notify('Carregando imagem...', 'success');
+            console.log('[handlePortfolioImage] _fbReady=', window._fbReady, '_fb=', !!window._fb);
             const { dataUrl, blob } = await compressImage(e.target.files[0], 1200, 0.78);
             sp('portfolio.posts.' + index + '.image', dataUrl); // preview imediato
             showTab('portfolio');
@@ -4005,6 +3976,7 @@ ${colorField('Texto Secundário', 't2')}
                     const oldPath = D.portfolio.posts[index] && D.portfolio.posts[index].imagePath;
                     if (oldPath) await window._fb.deleteImage(oldPath);
                     const { url, path } = await window._fb.uploadImage(blob, 'portfolio', 'post_' + index);
+                    console.log('[handlePortfolioImage] Upload OK. URL:', url.substring(0,60));
                     sp('portfolio.posts.' + index + '.image', url);
                     sp('portfolio.posts.' + index + '.imageURL', url);
                     sp('portfolio.posts.' + index + '.imagePath', path);
