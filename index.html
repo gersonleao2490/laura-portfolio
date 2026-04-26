@@ -2522,7 +2522,17 @@
 
             /* ── CONTATO ── */
             #contato-phone { padding: 2rem 1rem; min-height: unset; }
-            .phone-device  { width: 290px; }
+            .phone-wrap {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .phone-device {
+                width: 320px;
+                transform: scale(0.82);
+                transform-origin: top center;
+                margin-bottom: -60px;
+            }
 
             /* ── BOTÕES ── */
             .cta-btn { padding: 0.65rem 1.3rem; font-size: 0.82rem; }
@@ -2539,7 +2549,16 @@
             .partners-grid { grid-template-columns: 1fr; }
             .metrics-grid  { grid-template-columns: 1fr 1fr; }
 
-            .phone-device { width: 260px; border-radius: 38px; }
+            .phone-wrap {
+                display: flex;
+                justify-content: center;
+            }
+            .phone-device {
+                width: 320px;
+                transform: scale(0.72);
+                transform-origin: top center;
+                margin-bottom: -90px;
+            }
 
             .nav-logo { font-size: 1.1rem; }
             .section-heading h2 { font-size: 1.6rem; }
