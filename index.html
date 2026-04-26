@@ -79,27 +79,22 @@
                     }
                 };
 
-                // Autenticação anônima — aguarda confirmação ANTES de emitir firebase-ready
-                // (Firestore bloqueia leituras se auth != null e o login ainda não completou)
-                const auth = firebase.auth();
-                let _authDone = false;
-                const _dispatchReady = () => {
-                    if (_authDone) return;
-                    _authDone = true;
-                    window._fbReady = true;
-                    window.dispatchEvent(new Event('firebase-ready'));
-                    console.log('Firebase pronto (auth confirmada).');
-                };
-                auth.onAuthStateChanged(user => {
-                    if (user) { _dispatchReady(); }
-                });
-                auth.signInAnonymously().catch(e => {
-                    console.warn('Auth anônima falhou:', e.message);
-                    // mesmo sem auth, libera o app (vai usar localStorage)
-                    if (!_authDone) { _authDone = true; window._fbReady = false; window.dispatchEvent(new Event('firebase-ready')); }
-                });
-                // Segurança: se auth demorar >5s, libera mesmo assim
-                setTimeout(() => { if (!_authDone) { _authDone = true; window._fbReady = true; window.dispatchEvent(new Event('firebase-ready')); } }, 5000);
+                // Firebase pronto — sem autenticação obrigatória
+                // (regras do Storage e Firestore estão como públicas)
+                console.log('Firebase pronto (sem auth).');
+                window._fbReady = true;
+                window.dispatchEvent(new Event('firebase-ready'));
+
+                // Tenta auth anônima em background para melhor segurança futura,
+                // mas NÃO bloqueia o app se falhar
+                try {
+                    const auth = firebase.auth();
+                    auth.signInAnonymously().then(() => {
+                        console.log('Auth anônima OK.');
+                    }).catch(e => {
+                        console.warn('Auth anônima indisponível (ignorado):', e.message);
+                    });
+                } catch(e) {}
             } catch(err) {
                 console.warn('Firebase indisponível (file:// ou offline):', err.message);
                 window._fbReady = false;
